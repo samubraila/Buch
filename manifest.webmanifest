@@ -1,0 +1,35 @@
+{
+  "name": "LeseWelt – Lesen & Übersetzen",
+  "short_name": "LeseWelt",
+  "description": "Bücher lesen mit Übersetzer ins Russische und richtiger Aussprache.",
+  "id": "./",
+  "start_url": "./#/library",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#fbfaf7",
+  "theme_color": "#1f2a44",
+  "lang": "de",
+  "categories": ["books", "education"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "file_handlers": [
+    {
+      "action": "./#/library",
+      "accept": {
+        "application/epub+zip": [".epub"],
+        "application/x-fictionbook+xml": [".fb2"],
+        "application/pdf": [".pdf"],
+        "text/plain": [".txt"]
+      }
+    }
+  ],
+  "shortcuts": [
+    { "name": "Vokabeln trainieren", "url": "./#/train", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Vokabelheft", "url": "./#/vocab", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

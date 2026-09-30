@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.pyc
+
+# Editor / System
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Claude-Einstellungen
+.claude/
