@@ -6,6 +6,9 @@ import * as db from './db.js';
 import { el, LANGS, langName, toast } from './util.js';
 import { segmented, toggle, field, confirmDialog } from './ui.js';
 import { BUILD } from './version.js';
+import { APP_VERSION } from './changelog.js';
+import { checkForUpdate, showChangelog } from './update.js';
+import { createBackup, restoreBackup, shareOrDownload, backupName } from './backup.js';
 
 const TEST = {
   en: 'Hello! This is how English sounds with this voice.',
@@ -116,7 +119,7 @@ export async function openSettings(mount) {
       el('button', { class: 'btn', onclick: async () => { await db.clear('cache'); toast('Übersetzungs-Cache geleert'); estimate(); } }, 'Übersetzungs-Cache leeren'),
       el('button', { class: 'btn danger', onclick: async () => {
         if (!(await confirmDialog('Wirklich ALLES löschen (Bücher, Vokabeln, Einstellungen)?', { ok: 'Alles löschen', danger: true }))) return;
-        for (const s of ['books', 'contents', 'vocab', 'cache', 'kv']) await db.clear(s);
+        for (const s of ['books', 'contents', 'vocab', 'cache', 'kv', 'marks', 'stats']) await db.clear(s);
         location.hash = '#/library';
         location.reload();
       } }, 'Alles löschen')));
@@ -128,15 +131,55 @@ export async function openSettings(mount) {
     } catch { usage.textContent = 'unbekannt'; }
   }
 
+  // ---- Übertragen ----
+  const restoreInput = el('input', { type: 'file', accept: '.zip,application/zip', hidden: true });
+  const transferStatus = el('p', { class: 'muted small' });
+  const backupBtn = el('button', { class: 'btn primary', onclick: async () => {
+    backupBtn.disabled = true;
+    try {
+      const blob = await createBackup((p) => { transferStatus.textContent = `Sicherung wird erstellt … ${Math.round(p * 100)} %`; });
+      transferStatus.textContent = `Sicherung fertig (${(blob.size / 1048576).toFixed(1)} MB)`;
+      const how = await shareOrDownload(blob, backupName());
+      if (how === 'downloaded') toast('Sicherung gespeichert (Downloads) ✓', { type: 'success' });
+    } catch (e) { toast(e.message, { type: 'error' }); transferStatus.textContent = ''; }
+    backupBtn.disabled = false;
+  } }, '💾 Alles sichern');
+  restoreInput.addEventListener('change', async () => {
+    const f = restoreInput.files[0];
+    restoreInput.value = '';
+    if (!f) return;
+    try {
+      const r = await restoreBackup(f, (p) => { transferStatus.textContent = `Wird geladen … ${Math.round(p * 100)} %`; });
+      transferStatus.textContent = '';
+      toast(`Fertig ✓ ${r.added} Bücher neu, ${r.updated} aktualisiert, ${r.words} Vokabeln`, { type: 'success', ms: 6000 });
+      estimate();
+    } catch (e) { toast(e.message, { type: 'error', ms: 6000 }); transferStatus.textContent = ''; }
+  });
+  const transfer = el('section', { class: 'card-sec' }, el('h2', {}, 'Laptop ↔ Handy übertragen'),
+    el('p', {}, 'Speichert Bücher, Lesefortschritt, Vokabeln, Markierungen und Statistik in ', el('strong', {}, 'einer Datei'),
+      '. Auf dem anderen Gerät „Sicherung laden“ – vorhandene Daten bleiben erhalten und werden zusammengeführt.'),
+    el('div', { class: 'row wrap' }, backupBtn,
+      el('button', { class: 'btn', onclick: () => restoreInput.click() }, '📂 Sicherung laden'), restoreInput),
+    transferStatus,
+    el('small', { class: 'hint' }, 'Tipp fürs Handy: „Alles sichern“ öffnet das Teilen-Menü – schick dir die Datei z. B. per Telegram, WhatsApp oder E-Mail und öffne sie auf dem anderen Gerät mit „Sicherung laden“.'));
+
+  // ---- Updates ----
+  const updates = el('section', { class: 'card-sec' }, el('h2', {}, 'App & Updates'),
+    el('p', { class: 'version' }, `LeseWelt ${APP_VERSION} · Version `, el('strong', {}, BUILD)),
+    el('p', { class: 'muted small' }, 'Die App sucht automatisch nach Updates (beim Start, beim Zurückkehren und alle 30 Minuten) und aktualisiert sich selbst.'),
+    el('div', { class: 'row wrap' },
+      el('button', { class: 'btn', onclick: () => checkForUpdate({ manual: true }) }, '🔄 Nach Updates suchen'),
+      el('button', { class: 'btn', onclick: showChangelog }, '✨ Was ist neu'),
+      el('a', { class: 'btn', href: '#/stats' }, '📈 Statistik')));
+
   const about = el('section', { class: 'card-sec' }, el('h2', {}, 'Als App installieren'),
     el('ul', { class: 'howto' },
       el('li', {}, el('strong', {}, 'Laptop (Chrome/Edge): '), 'In der Adressleiste auf das Installieren-Symbol ⊕ klicken.'),
       el('li', {}, el('strong', {}, 'Android (Chrome): '), 'Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.'),
       el('li', {}, el('strong', {}, 'iPhone/iPad (Safari): '), 'Teilen-Knopf → „Zum Home-Bildschirm“.')),
-    el('p', { class: 'version' }, 'Version: ', el('strong', {}, BUILD)),
-    el('p', { class: 'muted small' }, 'LeseWelt 1.0 · Übersetzung: Google Translate / MyMemory · Wörterbuch: dictionaryapi.dev, Wiktionary'));
+    el('p', { class: 'muted small' }, 'Übersetzung: Google Translate / MyMemory · Wörterbuch: dictionaryapi.dev, Wiktionary · Bücher: Standard Ebooks, Project Gutenberg · Hörbücher: LibriVox'));
 
-  root.append(el('header', { class: 'page-head' }, el('div', {}, el('h1', {}, 'Einstellungen'))), look, tr, sp, data, about);
+  root.append(el('header', { class: 'page-head' }, el('div', {}, el('h1', {}, 'Einstellungen'))), updates, look, tr, sp, transfer, data, about);
   refreshDevice();
   const off = onVoices(drawVoices);
   drawVoices();

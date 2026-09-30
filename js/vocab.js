@@ -1,10 +1,10 @@
 // Vokabelheft-Ansicht und Karteikarten-Training
-import { allWords, dueWords, removeWord, review, toCSV, importBackup, INTERVALS } from './vocabStore.js';
+import { allWords, dueWords, removeWord, toCSV, importBackup, INTERVALS } from './vocabStore.js';
 import { speak } from './speech.js';
 import { el, escapeHtml, langName, toast, fmtDate } from './util.js';
 import { confirmDialog } from './ui.js';
 
-const SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
+export const SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
 const TRASH = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
 function download(name, text, type) {
@@ -14,7 +14,7 @@ function download(name, text, type) {
   setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
 
-function ctxHtml(ctx, word) {
+export function ctxHtml(ctx, word) {
   if (!ctx) return '';
   const s = escapeHtml(ctx);
   const w = escapeHtml(word).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -119,103 +119,4 @@ export async function openVocab(mount) {
   slot('sort').addEventListener('change', draw);
   await refresh();
   return () => {};
-}
-
-// ---------------- Training ----------------
-
-export async function openTrain(mount) {
-  let queue = await dueWords();
-  let extra = false;
-  if (!queue.length) {
-    const all = await allWords();
-    queue = [...all].sort(() => Math.random() - 0.5).slice(0, 20);
-    extra = true;
-  }
-  const total = queue.length;
-  let done = 0;
-  let reverse = false;
-  const stats = { 0: 0, 1: 0, 2: 0 };
-
-  const root = el('div', { class: 'page train' });
-  mount.replaceChildren(root);
-
-  function show() {
-    if (!queue.length) {
-      root.innerHTML = `
-        <div class="train-done">
-          <div class="empty-art">${total ? '🎉' : '⭐'}</div>
-          <h2>${total ? 'Super gemacht!' : 'Noch keine Vokabeln'}</h2>
-          <p class="muted">${total
-            ? `${done} Karten wiederholt · ${stats[2]} gewusst · ${stats[1]} schwer · ${stats[0]} nochmal`
-            : 'Speichere beim Lesen Wörter mit dem Stern ⭐, dann kannst du sie hier trainieren.'}</p>
-          <div class="empty-actions"><a class="btn primary" href="#/vocab">Zum Vokabelheft</a><a class="btn" href="#/library">Weiterlesen</a></div>
-        </div>`;
-      return;
-    }
-    const w = queue[0];
-    const front = reverse ? (w.translation || '—') : w.word;
-    root.innerHTML = `
-      <header class="train-head">
-        <a class="btn" href="#/vocab">← Zurück</a>
-        <div class="train-progress"><span style="width:${(done / total) * 100}%"></span></div>
-        <span class="muted">${done + 1} / ${total}${extra ? ' · Übung' : ''}</span>
-        <button class="btn" data-act="flip-dir" title="Richtung wechseln">${reverse ? 'Übersetzung → Wort' : 'Wort → Übersetzung'}</button>
-      </header>
-      <div class="flashcard" data-slot="card">
-        <div class="fc-lang">${escapeHtml(langName(reverse ? (w.target || 'ru') : w.lang))}</div>
-        <div class="fc-front" lang="${reverse ? (w.target || 'ru') : w.lang}">${escapeHtml(front)}</div>
-        ${!reverse && w.ipa ? `<div class="ipa">${escapeHtml(w.ipa)}</div>` : ''}
-        ${!reverse ? `<button class="chip-btn" data-act="speak">${SPEAK}<span>Anhören</span></button>` : ''}
-        ${w.context && !reverse ? `<p class="fc-ctx" lang="${w.lang}">${ctxHtml(w.context, w.word)}</p>` : ''}
-        <div class="fc-back" hidden>
-          <div class="fc-answer" lang="${reverse ? w.lang : (w.target || 'ru')}">${escapeHtml(reverse ? w.word : (w.translation || '—'))}</div>
-          ${reverse && w.ipa ? `<div class="ipa">${escapeHtml(w.ipa)}</div>` : ''}
-          ${!reverse && w.alts?.length ? `<div class="muted">${escapeHtml(w.alts.filter((a) => a !== w.translation).slice(0, 5).join(', '))}</div>` : ''}
-          ${reverse && w.context ? `<p class="fc-ctx" lang="${w.lang}">${ctxHtml(w.context, w.word)}</p>` : ''}
-        </div>
-      </div>
-      <div class="train-actions" data-slot="actions">
-        <button class="btn primary big" data-act="reveal">Antwort zeigen <kbd>Leertaste</kbd></button>
-      </div>`;
-    if (!reverse) speak(w.word, w.lang).catch(() => {});
-  }
-
-  function reveal() {
-    const back = root.querySelector('.fc-back');
-    if (!back || !back.hidden) return;
-    back.hidden = false;
-    const w = queue[0];
-    if (reverse) speak(w.word, w.lang).catch(() => {});
-    root.querySelector('[data-slot="actions"]').innerHTML = `
-      <button class="btn grade g0" data-act="g0">Nochmal <kbd>1</kbd></button>
-      <button class="btn grade g1" data-act="g1">Schwer <kbd>2</kbd></button>
-      <button class="btn grade g2" data-act="g2">Gewusst <kbd>3</kbd></button>`;
-  }
-
-  async function grade(g) {
-    const w = queue.shift();
-    stats[g]++;
-    done++;
-    if (!extra) await review(w.id, g);
-    else if (g === 2) await review(w.id, g);
-    if (g === 0) queue.splice(Math.min(queue.length, 3), 0, w); // gleich nochmal
-    if (g === 0) done--;
-    show();
-  }
-
-  root.addEventListener('click', (e) => {
-    const act = e.target.closest('[data-act]')?.dataset.act;
-    if (!act) return;
-    if (act === 'reveal') reveal();
-    if (act === 'speak') speak(queue[0].word, queue[0].lang).catch(() => {});
-    if (act === 'flip-dir') { reverse = !reverse; show(); }
-    if (/^g[012]$/.test(act)) grade(Number(act[1]));
-  });
-  const onKey = (e) => {
-    if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); reveal(); }
-    if (['1', '2', '3'].includes(e.key) && !root.querySelector('.fc-back')?.hidden) grade(Number(e.key) - 1);
-  };
-  document.addEventListener('keydown', onKey);
-  show();
-  return () => document.removeEventListener('keydown', onKey);
 }

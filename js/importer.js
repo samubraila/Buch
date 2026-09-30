@@ -131,7 +131,50 @@ export async function importText(text, title) {
   return saveParsed(parsed, { format: 'txt', fileKey: 'paste|' + Date.now() });
 }
 
+/**
+ * Buch aus dem Internet laden (Katalog "Entdecken").
+ * @param {object} o { url, key, title, author, lang, name, onProgress }
+ */
+export async function importFromUrl({ url, key, title, author, lang, name, onProgress = () => {} }) {
+  const fileKey = 'url|' + (key || url);
+  const existing = (await db.getAll('books')).find((b) => b.fileKey === fileKey);
+  if (existing) return { book: existing, existed: true };
+
+  let res;
+  try {
+    res = await fetch(url);
+  } catch {
+    throw new Error('Download fehlgeschlagen – bitte Internetverbindung prüfen.');
+  }
+  if (!res.ok) throw new Error(`Download fehlgeschlagen (${res.status})`);
+  const total = Number(res.headers.get('content-length')) || 0;
+  const chunks = [];
+  let loaded = 0;
+  if (res.body?.getReader) {
+    const reader = res.body.getReader();
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+      onProgress(total ? Math.min(0.95, (loaded / total) * 0.9) : 0.3, loaded);
+    }
+  } else {
+    chunks.push(new Uint8Array(await res.arrayBuffer()));
+  }
+  const file = new File(chunks, name, { type: res.headers.get('content-type') || '' });
+  const parsed = await parse(file, (p) => onProgress(0.9 + p * 0.1, loaded));
+  if (title) parsed.title = title;
+  if (author) parsed.author = author;
+  if (lang) parsed.lang = lang;
+  const book = await saveParsed(parsed, { format: kind(file), fileKey, name });
+  return { book, existed: false };
+}
+
 export async function deleteBook(id) {
   await db.del('books', id);
   await db.del('contents', id);
+  try {
+    for (const m of await db.getAllByIndex('marks', 'bookId', id)) await db.del('marks', m.id);
+  } catch { /* ignorieren */ }
 }

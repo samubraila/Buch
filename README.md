@@ -1,9 +1,12 @@
-# 📚 LeseWelt – Lesen · Übersetzen · Aussprechen
+# 📚 LeseWelt – Lesen · Übersetzen · Aussprechen · Hören
 
 [![Bauen & Veröffentlichen](https://github.com/samubraila/Buch/actions/workflows/pages.yml/badge.svg)](https://github.com/samubraila/Buch/actions/workflows/pages.yml)
 
-Lese-App für Laptop und Handy. Tippe auf ein Wort → du bekommst sofort die **russische Übersetzung**
-(Zielsprache einstellbar) und hörst die **richtige Aussprache** (Englisch US/UK, Deutsch und weitere Sprachen).
+Lese- und Sprachlern-App für Laptop und Handy. Tippe auf ein Wort → sofort die **russische Übersetzung**
+(Zielsprache einstellbar) und die **richtige Aussprache**. Bücher kannst du dir auch **vorlesen lassen**
+oder **echte Hörbücher** hören.
+
+**Version 2.0** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
 
 ## Starten
 
@@ -16,63 +19,65 @@ Lese-App für Laptop und Handy. Tippe auf ein Wort → du bekommst sofort die **
 
 **Lokal am Laptop:** `start.bat` doppelklicken → der Browser öffnet http://localhost:8080
 
-**Handy (gleiches WLAN):** Im schwarzen Startfenster steht eine Adresse wie
-`http://192.168.x.x:8080` – diese im Handy-Browser öffnen.
-Falls es nicht lädt: Windows-Firewall fragt beim ersten Start → „Zugriff zulassen" (privates Netzwerk).
+## 🔄 Immer die neueste Version
 
-> Hinweis: Über die WLAN-Adresse funktioniert alles zum Lesen und Übersetzen, aber die
-> **Installation als App** und der **Offline-Modus** brauchen HTTPS – dafür die Online-Adresse
-> (GitHub Pages) oben verwenden. Jeder `git push` auf `main` baut und aktualisiert die Online-Version automatisch (GitHub Actions, ca. 1–2 Min.).
+Die App **aktualisiert sich selbst**: Sie fragt beim Öffnen, beim Zurückkehren in die App und alle 30 Minuten
+bei GitHub nach Updates, lädt sie im Hintergrund und aktiviert sie automatisch – beim Lesen oder Trainieren erst,
+wenn du zur Bibliothek zurückgehst („✨ Update bereit"). Danach: „Aktualisiert – Was ist neu?".
 
-## So benutzt du die App
+Ablauf für neue Versionen:
 
-| Aktion | Was passiert |
+```
+git push  →  GitHub Actions: prüfen, Versionsnummer eintragen, veröffentlichen (1–2 Min.)  →  Handy holt sich das Update
+```
+
+Die installierte Version steht unter **Einstellungen → App & Updates**.
+
+## Funktionen
+
+| Bereich | Was geht |
 |---|---|
-| **Wort antippen** | Übersetzung + Alternativen, Aussprache (normal / langsam), Lautschrift, Satz im Kontext |
-| **Satz übersetzen** | Knopf im Wort-Fenster übersetzt den ganzen Satz |
-| **Text markieren** (lange drücken / mit der Maus ziehen) | Leiste „Übersetzen / Anhören" für die ganze Stelle |
-| **⭐ Stern** | Wort ins Vokabelheft (mit Satz aus dem Buch) |
-| **Wischen / Pfeiltasten / Rand antippen** | Seite umblättern |
-| **Mitte antippen** | Menüleisten ein-/ausblenden |
-| **🎧 Kopfhörer-Symbol** | Kapitel vorlesen lassen, aktueller Satz wird markiert |
-| **Aa** | Thema (Hell/Sepia/Dunkel/Schwarz), Schrift, Größe, Zeilenabstand, Rand, Seiten/Scrollen, Buchsprache |
+| **Lesen** | Seiten blättern oder scrollen, 4 Themen, 5 Schriften, Inhaltsverzeichnis, Fußnoten als Popup, Fortschritt |
+| **Wort antippen** | Übersetzung + Alternativen, Aussprache normal/langsam, Lautschrift, echte Aufnahmen (US/UK), Bedeutung |
+| **🎤 Nachsprechen** | Wort ins Mikrofon sagen – die App prüft die Aussprache in % |
+| **🌐 Zweisprachig** | „Absatz übersetzen" oder Zweisprachig-Modus: Übersetzung direkt unter jedem Absatz |
+| **🎧 Hören** | Buch vorlesen lassen (Satz wird markiert, Seite blättert mit), Tempo, Schlaf-Timer, +RU (Übersetzung nach jedem Satz), Sperrbildschirm-Steuerung |
+| **🎙 Hörbücher** | Echte, von Menschen gelesene Hörbücher (LibriVox) suchen und hören – mit Kapiteln, Tempo, Schlaf-Timer |
+| **📚 Entdecken** | 28 englische Klassiker (Standard Ebooks) und deutsche Klassiker nach Schwierigkeit, Suche in 70.000+ Gutenberg-Büchern – ein Tipp lädt das Buch |
+| **🔍🔖 Suchen & Markieren** | Suche im ganzen Buch, Lesezeichen, Markierungen in 4 Farben mit Notizen |
+| **⭐ Vokabeln** | Vokabelheft mit Kontext, 5 Trainingsarten (Karteikarten, Auswahl, Hören, Schreiben, Sprechen), Wiederholung nach 1/2/4/8/16 … Tagen, CSV-Export |
+| **📈 Statistik** | Tagesziel mit Ring, Serie 🔥, Lesezeit der letzten 14 Tage |
+| **💾 Übertragen** | Alles (Bücher, Fortschritt, Vokabeln, Markierungen) in eine Datei sichern und auf dem anderen Gerät laden |
+| **📤 Teilen** | Android: Text aus anderen Apps an LeseWelt teilen |
 
 ## Formate
 
-EPUB · FB2 / FB2.ZIP (auch russische Windows-1251-Dateien) · PDF (mit Text, nicht eingescannt) · TXT · HTML ·
-eingefügter Text.
-
-Kostenlose Bücher: [Standard Ebooks](https://standardebooks.org) (Englisch),
-[Project Gutenberg](https://www.gutenberg.org) (Englisch, Deutsch, …).
-
-## Vokabelheft
-
-- Alle gespeicherten Wörter mit Übersetzung, Kontext, Buch
-- **Trainieren**: Karteikarten mit Wiederholung nach 1 / 2 / 4 / 8 / 16 … Tagen
-- Export als CSV (z. B. für Anki), Sicherung/Wiederherstellung als JSON
-
-## Aussprache – Tipps für beste Qualität
-
-- **Automatisch** (Standard): beste Stimme des Geräts, sonst natürliche Online-Stimme
-- Bei englischen Wörtern gibt es oft **echte Aufnahmen** (Knöpfe „US" / „UK")
-- Bessere Gerätestimmen: Windows → Einstellungen → Zeit & Sprache → Sprache → Sprachpaket;
-  iPhone → Bedienungshilfen → Gesprochene Inhalte → Stimmen („Premium"); Android → Sprachausgabe → Google
+EPUB · FB2 / FB2.ZIP (auch russische Windows-1251-Dateien) · PDF (mit Text) · TXT · HTML · eingefügter Text.
 
 ## Technik
 
-Reines HTML/CSS/JavaScript ohne Build-Schritt. Daten liegen nur lokal im Browser (IndexedDB).
-Übersetzung: Google Translate → Ersatz MyMemory → Chrome-Offline-Übersetzer; Ergebnisse werden zwischengespeichert.
-Wörterbuch: dictionaryapi.dev (Lautschrift, Aufnahmen), Wiktionary (Bedeutungen).
+Reines HTML/CSS/JavaScript ohne Build-Werkzeuge. Daten liegen nur lokal im Browser (IndexedDB).
+Übersetzung: Google Translate → Ersatz MyMemory → Chrome-Offline-Übersetzer (mit Zwischenspeicher).
+Wörterbuch: dictionaryapi.dev, Wiktionary. Bücher: Standard Ebooks, Project Gutenberg (über archive.org).
+Hörbücher: LibriVox (über archive.org). Offline & Updates: Service Worker, veröffentlicht mit GitHub Actions.
 
 ```
-index.html, css/app.css, sw.js, manifest.webmanifest
-js/app.js          Navigation
-js/reader.js       Leser (Blättern, Wort-Erkennung, Vorlesen)
-js/popup.js        Übersetzungs-Fenster
-js/translate.js    Übersetzungsdienste
-js/speech.js       Aussprache
-js/dict.js         Wörterbuch
-js/library.js      Bibliothek
-js/vocab*.js       Vokabelheft + Training
-js/parsers/*       EPUB, FB2, PDF, TXT/HTML
+index.html, css/app.css, css/v2.css, sw.js, manifest.webmanifest
+js/app.js           Navigation, Teilen
+js/update.js        Automatische Updates, "Was ist neu"
+js/reader.js        Leser (Blättern, Wort-Erkennung, Zweisprachig, Suche, Markierungen, Hörbuch-Modus)
+js/popup.js         Übersetzungs-Fenster (inkl. Nachsprechen)
+js/practice.js      Spracherkennung fürs Nachsprechen
+js/translate.js     Übersetzungsdienste
+js/speech.js        Aussprache
+js/dict.js          Wörterbuch
+js/library.js       Bibliothek
+js/catalog.js       Entdecken (Bücher & Hörbücher)
+js/audioPlayer.js   Hörbuch-Player
+js/vocab.js         Vokabelheft
+js/train.js         Training (5 Arten)
+js/stats*.js        Statistik & Tagesziel
+js/backup.js        Sichern & Übertragen
+js/parsers/*        EPUB, FB2, PDF, TXT/HTML
+.github/workflows/pages.yml   Automatischer Build & Veröffentlichung
 ```

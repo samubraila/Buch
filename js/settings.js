@@ -20,6 +20,10 @@ export const DEFAULTS = {
   voices: {},             // Sprache -> voiceURI
   markSaved: true,        // gespeicherte Wörter im Text markieren
   showDefs: true,         // Wörterbuch-Bedeutungen anzeigen
+  dailyGoal: 15,          // Tagesziel in Minuten
+  bilingual: false,       // Zweisprachig lesen (Übersetzung unter jedem Absatz)
+  listenBilingual: false, // Hörbuch: nach jedem Satz die Übersetzung vorlesen
+  listenMode: 'auto',     // Hörbuch-Stimme: auto | device | online
 };
 
 export const settings = { ...DEFAULTS };

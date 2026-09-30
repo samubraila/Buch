@@ -5,6 +5,8 @@ import { englishEntry, wiktionary } from './dict.js';
 import { speak, playRecording, stop as stopSpeech } from './speech.js';
 import { saveWord, getWord, removeWord, vocabId } from './vocabStore.js';
 import { escapeHtml, isMobile, langName, LANGS, toast } from './util.js';
+import { canPractice, listen, feedback } from './practice.js';
+import { addStat } from './statsStore.js';
 
 let box;
 let token = 0;
@@ -94,6 +96,8 @@ const ICON = {
   mic: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9l-5.3 2.7 1-5.8-4.2-4.1 5.9-.9z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>',
   close: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+  practice: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3" fill="currentColor"/><path d="M6 11a6 6 0 0 0 12 0M12 17v4M9 21h6" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
+  para: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 10h16M4 14h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M15 17l3 3 3-3M18 13v7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   copy: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.8" fill="none"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" stroke="currentColor" stroke-width="1.8" fill="none"/></svg>',
 };
 
@@ -118,6 +122,7 @@ export async function openWord(o) {
   const tgt = targetFor(src);
   const saved = await getWord(o.word, src);
   const isEn = src === 'en';
+  addStat('lookups');
 
   b.innerHTML = `
     <div class="lk-grip" aria-hidden="true"></div>
@@ -135,8 +140,10 @@ export async function openWord(o) {
       <button class="chip-btn primary" data-act="speak">${ICON.speak}<span>Anhören</span></button>
       <button class="chip-btn" data-act="slow">${ICON.slow}<span>Langsam</span></button>
       <span data-slot="rec"></span>
+      ${canPractice ? `<button class="chip-btn" data-act="practice" title="Sprich das Wort nach – die App prüft deine Aussprache">${ICON.practice}<span>Nachsprechen</span></button>` : ''}
       ${langSelect(src)}
     </div>
+    <div class="lk-practice" data-slot="practice" hidden></div>
     <section class="lk-sec">
       <div class="lk-label">${escapeHtml(langName(tgt))}</div>
       <div data-slot="tr">${skeleton}</div>
@@ -148,6 +155,7 @@ export async function openWord(o) {
       <div class="lk-row">
         <button class="chip-btn" data-act="speak-sentence">${ICON.speak}<span>Satz anhören</span></button>
         <button class="chip-btn" data-act="tr-sentence"><span>Satz übersetzen</span></button>
+        ${o.onTranslateParagraph ? `<button class="chip-btn" data-act="tr-para" title="Übersetzung unter dem Absatz im Buch anzeigen">${ICON.para}<span>Absatz übersetzen</span></button>` : ''}
       </div>
       <div data-slot="sent"></div>
     </section>` : ''}
@@ -176,6 +184,8 @@ export async function openWord(o) {
     }
     if (act === 'speak-sentence') speak(o.sentence, src).catch(speechErr);
     if (act === 'tr-sentence') loadSentence();
+    if (act === 'tr-para') { close(); o.onTranslateParagraph?.(); }
+    if (act === 'practice') practice();
     if (act === 'save') {
       const btn = e.target.closest('[data-act]');
       const on = btn.classList.toggle('on');
@@ -189,6 +199,7 @@ export async function openWord(o) {
           context: o.sentence || '', bookId: o.bookId, bookTitle: o.bookTitle,
         });
         toast('Im Vokabelheft gespeichert ⭐');
+        addStat('saved');
       } else {
         await removeWord(vocabId(o.word, src));
         toast('Aus dem Vokabelheft entfernt');
@@ -221,6 +232,30 @@ export async function openWord(o) {
       if (my !== token) return;
       slot('tr').innerHTML = `<p class="lk-err">${escapeHtml(err.message)}</p><button class="chip-btn" data-act="retry">Erneut versuchen</button>`;
     }
+  }
+
+  async function practice() {
+    const box = slot('practice');
+    const btn = b.querySelector('[data-act="practice"]');
+    box.hidden = false;
+    box.className = 'lk-practice listening';
+    box.innerHTML = '<span class="pulse"></span> Sprich jetzt: <strong></strong>';
+    box.querySelector('strong').textContent = o.word;
+    btn.disabled = true;
+    stopSpeech();
+    try {
+      const r = await listen(o.word, src);
+      if (my !== token) return;
+      const f = feedback(r.score);
+      box.className = `lk-practice ${f.cls}`;
+      box.innerHTML = `<span>Gehört: „<strong></strong>“</span><span class="score">${r.score} %</span><span class="fb">${f.text}</span>`;
+      box.querySelector('strong').textContent = r.heard;
+    } catch (err) {
+      if (my !== token) return;
+      box.className = 'lk-practice bad';
+      box.textContent = err.message;
+    }
+    btn.disabled = false;
   }
 
   async function loadSentence() {

@@ -20,8 +20,28 @@ export function decodeText(buf) {
 
 const CHAPTER_RE = /^(chapter|kapitel|глава|часть|part|teil|book|buch|книга|capitolul|chapitre|capítulo|capitolo|rozdział|розділ|prolog(ue)?|epilog(ue)?|пролог|эпилог|vorwort|nachwort|предисловие)\b[\s\dIVXLCDM.:–—-]*.{0,60}$|^[IVXLCDM]{1,7}\.?$|^\d{1,3}\.?$|^\*\s*\*\s*\*$/i;
 
+// Project-Gutenberg-Vor- und Nachspann (Lizenztext) entfernen
+export function stripGutenberg(text) {
+  let t = text.replace(/\r\n?/g, '\n');
+  const start = t.search(/\*{3}\s*START OF (THE|THIS) PROJECT GUTENBERG[^\n]*\n/i);
+  if (start >= 0) t = t.slice(t.indexOf('\n', start) + 1);
+  else {
+    const old = t.search(/\*END\*THE SMALL PRINT[^\n]*\n/i);
+    if (old >= 0) t = t.slice(t.indexOf('\n', old) + 1);
+  }
+  const end = t.search(/\*{3}\s*END OF (THE|THIS) PROJECT GUTENBERG|End of (the )?Project Gutenberg'?s?\s/i);
+  if (end > 0) t = t.slice(0, end);
+  // Einleitungsabsatz wie "Produced by ..." am Anfang entfernen (nur bis zur nächsten Leerzeile)
+  const lead = t.trimStart();
+  if (/^(Produced by|This e-?book was produced by|E-text prepared by|Transcribed from)/i.test(lead)) {
+    const blank = lead.search(/\n[ \t]*\n/);
+    if (blank > 0 && blank < 1500) t = lead.slice(blank);
+  }
+  return t;
+}
+
 export function textToBook(raw, name = 'Text') {
-  const text = raw.replace(/\r\n?/g, '\n').replace(/ /g, ' ').trim();
+  const text = stripGutenberg(raw).replace(/\r\n?/g, '\n').replace(/ /g, ' ').trim();
   const hasBlankLines = /\n\s*\n/.test(text);
   let paras;
   if (hasBlankLines) {

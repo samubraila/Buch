@@ -4,6 +4,9 @@ import { importFile, importText, deleteBook, saveParsed, ACCEPT } from './import
 import { SAMPLES } from './samples.js';
 import { el, coverColors, langName, toast, fmtMinutes } from './util.js';
 import { openSheet, confirmDialog } from './ui.js';
+import { getDay, streak } from './statsStore.js';
+import { goalRing, minutes } from './stats.js';
+import { settings } from './settings.js';
 
 const I = {
   plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -32,15 +35,20 @@ export async function openLibrary(mount) {
         <input type="file" accept="${ACCEPT}" multiple hidden data-slot="file">
       </div>
     </header>
-    <div data-slot="continue"></div>
+    <div class="lib-top"><div data-slot="continue"></div><a class="today-mini" href="#/stats" data-slot="today" aria-label="Statistik öffnen"></a></div>
     <section>
       <div class="sec-head"><h2>Meine Bücher</h2><span class="muted" data-slot="count"></span></div>
       <div class="book-grid" data-slot="grid"></div>
       <div data-slot="empty"></div>
     </section>
     <section class="sources">
-      <h2>Kostenlose Bücher finden</h2>
-      <p class="muted">Lade ein EPUB herunter und füge es hier mit „Buch hinzufügen“ ein – oder ziehe die Datei einfach in dieses Fenster.</p>
+      <h2>Kostenlose Bücher & Hörbücher</h2>
+      <a class="discover-banner" href="#/discover">
+        <span class="db-icon">📚</span>
+        <span><strong>Entdecken</strong><span class="muted">Über 70.000 freie Bücher und Tausende Hörbücher – direkt in der App laden, nach Schwierigkeit sortiert.</span></span>
+        <span class="btn primary">Öffnen →</span>
+      </a>
+      <p class="muted">Oder selbst herunterladen und mit „Buch hinzufügen“ einfügen – bzw. die Datei in dieses Fenster ziehen:</p>
       <div class="source-list">
         <a href="https://standardebooks.org/ebooks" target="_blank" rel="noopener"><strong>Standard Ebooks</strong><span>Englische Klassiker, wunderschön gesetzt</span></a>
         <a href="https://www.gutenberg.org/ebooks/search/?query=l.en&sort_order=downloads" target="_blank" rel="noopener"><strong>Project Gutenberg · Englisch</strong><span>Über 70.000 freie Bücher</span></a>
@@ -59,6 +67,16 @@ export async function openLibrary(mount) {
     urls.splice(0).forEach((u) => URL.revokeObjectURL(u));
     books = (await db.getAll('books')).sort((a, b) => (b.lastRead || b.addedAt) - (a.lastRead || a.addedAt));
     draw();
+    drawToday();
+  }
+
+  async function drawToday() {
+    const [day, st] = await Promise.all([getDay(), streak()]);
+    const goal = settings.dailyGoal || 15;
+    const m = minutes(day.readMs);
+    slot('today').innerHTML = `${goalRing(m, goal, 58)}
+      <span class="tm-text"><strong>${m}/${goal} Min.</strong><span class="muted">heute gelesen</span>
+      <span class="streak">🔥 ${st} ${st === 1 ? 'Tag' : 'Tage'}</span></span>`;
   }
 
   function draw() {
@@ -94,7 +112,8 @@ export async function openLibrary(mount) {
         el('h3', {}, 'Deine Bibliothek ist noch leer'),
         el('p', { class: 'muted' }, 'Füge ein Buch hinzu (EPUB, FB2, PDF, TXT) oder probiere ein Beispiel aus. Tippe beim Lesen auf ein Wort – du bekommst sofort die Übersetzung und hörst die Aussprache.'),
         el('div', { class: 'empty-actions' },
-          ...SAMPLES.map((s) => el('button', { class: 'btn', onclick: () => addSample(s) }, el('span', { class: 'lang-chip' }, s.lang.toUpperCase()), s.title)))));
+          ...SAMPLES.map((s) => el('button', { class: 'btn', onclick: () => addSample(s) }, el('span', { class: 'lang-chip' }, s.lang.toUpperCase()), s.title)),
+          el('a', { class: 'btn primary', href: '#/discover' }, '📚 Mehr Bücher entdecken'))));
     } else if (!list.length) {
       empty.append(el('p', { class: 'muted empty-search' }, 'Keine Treffer.'));
     }
@@ -130,6 +149,8 @@ export async function openLibrary(mount) {
         el('strong', {}, b.title),
         el('span', { class: 'muted' }, [b.author, langName(b.lang), (b.format || '').toUpperCase(), `${b.chapters.length} Kapitel`, fmtMinutes(b.totalChars) + ' Lesezeit'].filter(Boolean).join(' · '))),
       el('a', { class: 'menu-item', href: `#/read/${b.id}`, onclick: () => dlg.close() }, '📖 Lesen'),
+      el('a', { class: 'menu-item', href: `#/read/${b.id}/listen`, onclick: () => dlg.close() }, '🎧 Anhören (vorlesen lassen)'),
+      el('a', { class: 'menu-item', href: `#/discover/audio/${encodeURIComponent(b.title)}`, onclick: () => dlg.close() }, '🎙 Echtes Hörbuch dazu suchen'),
       el('button', { class: 'menu-item', onclick: async () => {
         b.pos = { ch: 0, blk: 0, pct: 0 }; b.lastRead = 0;
         await db.put('books', b); dlg.close(); refresh();

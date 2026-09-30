@@ -1,7 +1,8 @@
-// LeseWelt – Einstieg: Navigation, Routen, Service Worker
+// LeseWelt – Einstieg: Navigation, Routen, Updates, Teilen
 import { loadSettings } from './settings.js';
 import { dueWords, onVocab } from './vocabStore.js';
-import { importFile } from './importer.js';
+import { importFile, importText } from './importer.js';
+import { initUpdates, announceUpdate } from './update.js';
 import { toast } from './util.js';
 
 const view = document.getElementById('view');
@@ -11,16 +12,20 @@ let routeToken = 0;
 async function route() {
   const my = ++routeToken;
   const hash = location.hash || '#/library';
-  const [, name, arg] = hash.split('/');
+  const [, name, ...rest] = hash.split('/');
+  const arg = rest[0];
   try { await cleanup?.(); } catch { /* ignorieren */ }
   cleanup = null;
   document.body.dataset.route = name || 'library';
-  document.querySelectorAll('.app-nav a').forEach((a) => a.setAttribute('aria-current', a.dataset.route === name ? 'page' : 'false'));
+  const navRoute = name === 'train' ? 'vocab' : name === 'stats' ? 'library' : (name || 'library');
+  document.querySelectorAll('.app-nav a').forEach((a) => a.setAttribute('aria-current', a.dataset.route === navRoute ? 'page' : 'false'));
   let fn;
   switch (name) {
-    case 'read': fn = (await import('./reader.js')).openReader.bind(null, arg); break;
+    case 'read': { const m = await import('./reader.js'); fn = (v) => m.openReader(arg, v, { listen: rest[1] === 'listen' }); break; }
     case 'vocab': fn = (await import('./vocab.js')).openVocab; break;
-    case 'train': fn = (await import('./vocab.js')).openTrain; break;
+    case 'train': { const m = await import('./train.js'); fn = (v) => m.openTrain(v, arg); break; }
+    case 'discover': { const m = await import('./catalog.js'); fn = (v) => m.openCatalog(v, arg, rest.slice(1).join('/')); break; }
+    case 'stats': fn = (await import('./stats.js')).openStats; break;
     case 'settings': fn = (await import('./settingsView.js')).openSettings; break;
     default: fn = (await import('./library.js')).openLibrary;
   }
@@ -37,12 +42,30 @@ async function updateBadge() {
   if (b) { b.textContent = n > 99 ? '99+' : String(n); b.hidden = !n; }
 }
 
+// Text, der aus einer anderen App geteilt wurde (Android: Teilen -> LeseWelt)
+async function handleShare() {
+  const p = new URLSearchParams(location.search);
+  if (!p.has('text') && !p.has('url') && !p.has('title')) return;
+  const text = [p.get('text'), p.get('url')].filter(Boolean).join('\n\n').trim();
+  const title = (p.get('title') || '').trim();
+  history.replaceState(null, '', location.pathname + (location.hash || '#/library'));
+  if (text.length < 3) return;
+  try {
+    const book = await importText(text, title || 'Geteilter Text');
+    location.hash = `#/read/${book.id}`;
+  } catch (e) {
+    toast(e.message, { type: 'error' });
+  }
+}
+
 async function start() {
   await loadSettings();
   window.addEventListener('hashchange', route);
+  await handleShare();
   await route();
   updateBadge();
   onVocab(updateBadge);
+  announceUpdate();
 
   // Dateien, die mit "Öffnen mit …" an die installierte App übergeben werden
   if ('launchQueue' in window) {
@@ -56,18 +79,7 @@ async function start() {
     });
   }
 
-  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
-    navigator.serviceWorker.register('sw.js').then((reg) => {
-      reg.addEventListener('updatefound', () => {
-        const nw = reg.installing;
-        nw?.addEventListener('statechange', () => {
-          if (nw.state === 'installed' && navigator.serviceWorker.controller) {
-            toast('Neue Version verfügbar', { ms: 10000, action: { label: 'Neu laden', fn: () => location.reload() } });
-          }
-        });
-      });
-    }).catch(() => { /* ohne Offline-Modus weiter */ });
-  }
+  initUpdates();
 }
 
 window.addEventListener('offline', () => toast('Offline – bereits übersetzte Wörter funktionieren weiter.'));

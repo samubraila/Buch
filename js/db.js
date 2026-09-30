@@ -1,8 +1,9 @@
 // Kleine Promise-Hülle um IndexedDB.
-// Stores: books (Metadaten), contents (Kapitel + Bilder), vocab, cache, kv (Einstellungen)
+// Stores: books (Metadaten), contents (Kapitel + Bilder), vocab, cache, kv (Einstellungen),
+//         marks (Lesezeichen + Markierungen), stats (Lesestatistik pro Tag)
 
 const DB_NAME = 'lesewelt';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 let dbPromise;
 
 function open() {
@@ -19,10 +20,18 @@ function open() {
       }
       if (!db.objectStoreNames.contains('cache')) db.createObjectStore('cache', { keyPath: 'key' });
       if (!db.objectStoreNames.contains('kv')) db.createObjectStore('kv', { keyPath: 'key' });
+      if (!db.objectStoreNames.contains('marks')) {
+        const m = db.createObjectStore('marks', { keyPath: 'id' });
+        m.createIndex('bookId', 'bookId');
+      }
+      if (!db.objectStoreNames.contains('stats')) db.createObjectStore('stats', { keyPath: 'day' });
     };
     req.onsuccess = () => resolve(req.result);
     req.onerror = () => reject(req.error);
+    // andere offene Tabs blockieren das Upgrade nicht dauerhaft
+    req.onblocked = () => console.warn('Datenbank-Update wartet auf andere Tabs');
   });
+  dbPromise.then((db) => { db.onversionchange = () => { db.close(); location.reload(); }; }).catch(() => {});
   return dbPromise;
 }
 
@@ -44,6 +53,10 @@ export async function get(name, key) {
 
 export async function getAll(name) {
   return wrap((await store(name)).getAll());
+}
+
+export async function getAllByIndex(name, index, value) {
+  return wrap((await store(name)).index(index).getAll(value));
 }
 
 export async function put(name, value) {

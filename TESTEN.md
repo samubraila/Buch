@@ -17,61 +17,87 @@ Scanne den QR-Code mit der Handy-Kamera – oder tippe die Adresse ein:
 
 Danach hast du das LeseWelt-Icon auf dem Startbildschirm und die App öffnet sich ohne Browser-Leiste.
 
-## 3. Welche Version habe ich?
+## 3. 🔄 Immer die neueste Version – automatisch
 
-**Einstellungen** → ganz unten steht **„Version: 2026-…-abc1234"**.
-Die Zahl am Ende ist der Commit auf GitHub. So siehst du, ob das neueste Update schon da ist.
+Du musst **nichts** tun. Die App aktualisiert sich selbst:
+
+1. Wenn eine neue Version auf GitHub veröffentlicht wird (`git push` → GitHub baut in 1–2 Minuten),
+2. fragt die App **beim Öffnen**, **beim Zurückkehren in die App** und **alle 30 Minuten** nach Updates,
+3. lädt das Update im Hintergrund und **aktiviert es sofort** – in der Bibliothek, bei Entdecken, Vokabeln oder Einstellungen,
+4. beim **Lesen oder Trainieren** stört sie dich nicht: Oben erscheint **„✨ Update bereit – Jetzt aktualisieren"**. Tippe darauf oder geh einfach zurück zur Bibliothek. Dein Lesefortschritt bleibt erhalten.
+5. Danach siehst du **„Aktualisiert auf Version … ✓ – Was ist neu?"**
+
+**Version prüfen:** Einstellungen → ganz oben **„App & Updates"** → z. B. `Version 2026-09-30-abc1234`.
+Dort gibt es auch **„🔄 Nach Updates suchen"** (sofort prüfen) und **„✨ Was ist neu"**.
+
+> Einmaliger Sonderfall: Wer noch Version 1.0 installiert hat, sieht beim nächsten Öffnen **„Neue Version verfügbar – Neu laden"**. Einmal tippen, ab dann läuft alles automatisch.
 
 ## 4. Test-Checkliste
 
 Einfach der Reihe nach durchgehen und abhaken:
 
 **Grundlagen**
-- [ ] App öffnet sich, Bibliothek ist zu sehen
+- [ ] App öffnet sich, Bibliothek mit **Tagesziel-Ring** oben
 - [ ] Beispiel **„Alice's Adventures in Wonderland"** antippen → Buch öffnet sich
 - [ ] Nach links/rechts **wischen** → Seite blättert um
-- [ ] **Mitte antippen** → Menüleisten oben/unten erscheinen und verschwinden
+- [ ] **Mitte antippen** → Menüleisten erscheinen/verschwinden
+
+**📚 Entdecken (neu)**
+- [ ] Unten **„Entdecken"** → Reiter **Englisch** → z. B. „The Wonderful Wizard of Oz" → **Laden** → **Lesen**
+- [ ] Reiter **Deutsch** → „Die Verwandlung" laden
+- [ ] Reiter **Suchen** → „Sherlock" eingeben → Buch laden
+- [ ] Reiter **Hörbücher** → ein Hörbuch **▶ Anhören** → Player öffnet sich, unten erscheint die Mini-Leiste
 
 **Übersetzen & Aussprache**
-- [ ] Ein **Wort antippen** → Karte mit russischer Übersetzung erscheint
-- [ ] Das Wort wird **automatisch ausgesprochen** (Lautstärke an? iPhone: Stumm-Schalter aus!)
-- [ ] **„Langsam"** → Wort wird langsam gesprochen
-- [ ] **„Satz übersetzen"** → ganzer Satz auf Russisch
-- [ ] **Lange auf ein Wort drücken** und Markierung ziehen → Leiste „Übersetzen / Anhören" erscheint
-- [ ] Deutsches Beispiel **„Die Bremer Stadtmusikanten"** → Wort antippen → deutsche Aussprache
+- [ ] **Wort antippen** → russische Übersetzung + Aussprache (Lautstärke an! iPhone: Stumm-Schalter aus)
+- [ ] **„Langsam"** und **„Satz übersetzen"**
+- [ ] **🎤 Nachsprechen** → Wort sagen → Ergebnis in % (Mikrofon erlauben)
+- [ ] **„Absatz übersetzen"** → Übersetzung erscheint direkt unter dem Absatz
+- [ ] Oben das **Zweisprachig-Symbol** (Zeilen mit „A") → jeder Absatz bekommt die Übersetzung darunter
 
-**Vokabeln**
-- [ ] In der Wort-Karte auf **⭐** tippen → „Im Vokabelheft gespeichert"
-- [ ] Das Wort ist im Text jetzt **gepunktet unterstrichen**
-- [ ] Unten **„Vokabeln"** → Wort steht in der Liste
-- [ ] **„Trainieren"** → Karteikarte → „Antwort zeigen" → „Gewusst"
+**🎧 Hören (neu)**
+- [ ] Oben **🎧** → das Buch wird vorgelesen, der Satz wird markiert, die Seite blättert mit
+- [ ] In der Leiste: **Tempo**, **🌙 Schlaf-Timer**, **+RU** (nach jedem Satz die russische Übersetzung)
+- [ ] Bildschirm ausschalten → Vorlesen läuft weiter (Einstellung „Stimme beim Anhören: Online" bzw. Automatisch)
+- [ ] Sperrbildschirm zeigt Play/Pause
 
-**Darstellung**
-- [ ] Oben **Aa** → Thema **Sepia** und **Dunkel** ausprobieren
-- [ ] Schriftgröße **A+ / A−** ändern
-- [ ] Lesemodus **„Scrollen"** ausprobieren
-- [ ] Oben **☰** (Inhalt) → Kapitelliste öffnet sich
-- [ ] **🎧** → Vorlesen startet, aktueller Satz wird gelb markiert
+**🔍🔖 Suchen, Lesezeichen, Markierungen (neu)**
+- [ ] Oben **🔍** → Wort suchen → Treffer antippen → Stelle wird gezeigt
+- [ ] Oben rechts auf der Seite **🔖** → Lesezeichen
+- [ ] Text lange drücken → Farbe wählen → Stelle ist markiert
+- [ ] **☰** → Reiter **Lesezeichen** / **Markierungen** → Notiz hinzufügen
 
-**Eigene Bücher**
-- [ ] Ein freies EPUB herunterladen, z. B. von [standardebooks.org](https://standardebooks.org) oder [gutenberg.org](https://www.gutenberg.org)
-- [ ] In der Bibliothek **„Buch hinzufügen"** → Datei aus „Downloads" wählen → Buch erscheint mit Cover
+**Vokabeln & Training**
+- [ ] In der Wort-Karte **⭐** → Wort im Vokabelheft, im Text unterstrichen
+- [ ] **Vokabeln → Trainieren** → alle 5 Arten ausprobieren: Karteikarten, Auswahl, Hören, Schreiben, Sprechen
+
+**📈 Statistik (neu)**
+- [ ] Bibliothek → Tagesziel-Ring antippen → Statistik mit Lesezeit der letzten 14 Tage
+- [ ] Tagesziel ändern (z. B. 20 Min.)
+
+**💾 Übertragen (neu)**
+- [ ] Einstellungen → **„Alles sichern"** → Datei per Telegram/WhatsApp/E-Mail an dich schicken
+- [ ] Auf dem anderen Gerät: **„Sicherung laden"** → Bücher und Vokabeln sind da
+
+**📤 Teilen (Android)**
+- [ ] In einer anderen App Text markieren → **Teilen → LeseWelt** → Text öffnet sich zum Lesen
 
 **Offline**
-- [ ] **Flugmodus** einschalten → App öffnen → Bibliothek und Bücher funktionieren
-- [ ] Schon nachgeschlagene Wörter werden auch offline übersetzt
+- [ ] **Flugmodus** → App öffnen → Bibliothek und Bücher funktionieren
 
 ## 5. Wenn etwas nicht geht
 
 | Problem | Lösung |
 |---|---|
-| **Kein Ton** | Lautstärke hoch; iPhone: Stumm-Schalter an der Seite aus. Einstellungen → Aussprache → **„Online-Stimme"** probieren |
-| **Stimme klingt schlecht** | Einstellungen → Aussprache → andere Stimme wählen und **„▶ Test"** drücken |
+| **Kein Ton** | Lautstärke hoch; iPhone: Stumm-Schalter aus. Einstellungen → Aussprache → **„Online-Stimme"** probieren |
+| **Vorlesen stoppt bei ausgeschaltetem Bildschirm** | Leser → **Aa** → „Stimme beim Anhören" → **Online** |
+| **„Nachsprechen" fehlt** | Spracherkennung gibt es nur in Chrome (Android) und Safari (iPhone) |
 | **„Übersetzung nicht erreichbar"** | Internet prüfen, kurz warten, **„Erneut versuchen"** |
-| **Alte Version / Änderung fehlt** | App ganz schließen und neu öffnen. Wenn „Neue Version verfügbar" erscheint → **„Neu laden"** |
-| **„App installieren" fehlt** | Android: Chrome verwenden. iPhone: **Safari** verwenden (nicht Chrome) |
+| **Buch lädt nicht bei „Entdecken"** | Internet prüfen – große Bücher brauchen ein paar Sekunden |
+| **Alte Version** | App ganz schließen und neu öffnen, oder Einstellungen → **„Nach Updates suchen"** |
+| **„App installieren" fehlt** | Android: Chrome verwenden. iPhone: **Safari** verwenden |
 
-## 6. Wie kommen Updates aufs Handy?
+## 6. Wie kommt eine neue Version aufs Handy?
 
 1. Änderung am Laptop machen und auf GitHub schieben:
    ```
@@ -79,7 +105,8 @@ Einfach der Reihe nach durchgehen und abhaken:
    git commit -m "Beschreibung der Änderung"
    git push
    ```
-2. GitHub baut die App automatisch (Reiter **Actions** → „Bauen & Veröffentlichen", dauert ca. 1–2 Min.).
-3. App auf dem Handy schließen und neu öffnen → neue Version (in Einstellungen prüfen).
+2. GitHub baut die App automatisch (Reiter **Actions** → „Bauen & Veröffentlichen", ca. 1–2 Min.):
+   JavaScript prüfen → Versionsnummer eintragen → veröffentlichen.
+3. **Fertig** – das Handy holt sich das Update von selbst (siehe Abschnitt 3).
 
 Build-Status: https://github.com/samubraila/Buch/actions
