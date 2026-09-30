@@ -1065,3 +1065,6 @@ hr { border: 0; border-top: 1px solid var(--line); margin: 18px 0; }
 @media (max-width: 760px) {
   .card-sec { padding: 18px 16px 6px; }
 }
+
+.version { margin: 4px 0 2px; font-size: 0.9rem; }
+.version strong { font-variant-numeric: tabular-nums; }

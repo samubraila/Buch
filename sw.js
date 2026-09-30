@@ -1,11 +1,13 @@
 // Service Worker: App offline verfügbar machen
-const VERSION = 'lesewelt-v1';
+// Wird beim Bauen auf GitHub automatisch ersetzt -> Handys laden die neue Version
+const VERSION = 'lesewelt-lokal';
 const SHELL = [
   './',
   'index.html',
   'manifest.webmanifest',
   'css/app.css',
   'js/app.js',
+  'js/version.js',
   'js/db.js',
   'js/util.js',
   'js/settings.js',
@@ -34,7 +36,8 @@ const SHELL = [
 ];
 
 self.addEventListener('install', (e) => {
-  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
+  // cache: 'reload' umgeht den HTTP-Cache, damit wirklich die neuen Dateien gespeichert werden
+  e.waitUntil(caches.open(VERSION).then((c) => c.addAll(SHELL.map((u) => new Request(u, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (e) => {

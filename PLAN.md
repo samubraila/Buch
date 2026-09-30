@@ -58,7 +58,7 @@ Eine Lese-App für Laptop und Handy (PWA, installierbar), mit eingebautem Übers
 ## 4. Starten
 - Laptop: `start.bat` doppelklicken → öffnet http://localhost:8080
 - Handy im gleichen WLAN: Adresse aus dem Startfenster (http://192.168.x.x:8080) öffnen.
-- Für Installation als App auf dem Handy (HTTPS): kostenlos auf Vercel veröffentlichen (optional).
+- Für Installation als App auf dem Handy (HTTPS): online über GitHub Pages → https://samubraila.github.io/Buch/
 
 ## 5. Umsetzung (Reihenfolge)
 1. Grundgerüst, Design-System, Themen, Manifest, Icons
@@ -73,3 +73,10 @@ Eine Lese-App für Laptop und Handy (PWA, installierbar), mit eingebautem Übers
 ## 6. Auf Github Push 
 1. git@github.com:samubraila/Buch.git 
 2. Test und auf github starten so das auch als app dort startet und ich bei mir auf händy dann auch nutzen kann
+
+**Stand: ✅ erledigt (30.09.2026)**
+- Code liegt auf https://github.com/samubraila/Buch (Branch `main`)
+- App läuft online: **https://samubraila.github.io/Buch/** – auf dem Handy als App installierbar, funktioniert offline
+- Automatischer Build mit GitHub Actions (`.github/workflows/pages.yml`): JavaScript prüfen → Versionsnummer eintragen → veröffentlichen
+- Versionsnummer sichtbar in der App unter **Einstellungen → Version**
+- Handy-Testanleitung mit QR-Code und Checkliste: [TESTEN.md](TESTEN.md)

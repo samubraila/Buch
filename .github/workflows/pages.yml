@@ -1,0 +1,73 @@
+# Baut die App bei jedem Push auf "main" und veröffentlicht sie auf GitHub Pages:
+# https://samubraila.github.io/Buch/
+name: Bauen & Veröffentlichen
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # manuell starten: Actions -> "Bauen & Veröffentlichen" -> Run workflow
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Prüfen & Bauen
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+
+      - name: JavaScript auf Fehler prüfen
+        run: |
+          for f in js/*.js js/parsers/*.js sw.js; do
+            node --check "$f"
+          done
+
+      - name: Versionsnummer eintragen
+        run: |
+          BUILD="$(date -u +%Y-%m-%d)-${GITHUB_SHA::7}"
+          sed -i "s/const VERSION = 'lesewelt-[^']*'/const VERSION = 'lesewelt-${BUILD}'/" sw.js
+          sed -i "s/export const BUILD = '[^']*'/export const BUILD = '${BUILD}'/" js/version.js
+          grep -q "lesewelt-${BUILD}" sw.js
+          grep -q "${BUILD}" js/version.js
+          echo "Version: ${BUILD}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Webseite zusammenstellen
+        run: |
+          mkdir _site
+          cp -r index.html manifest.webmanifest sw.js css js icons vendor _site/
+          # Alle Dateien, die der Service Worker offline speichert, müssen vorhanden sein
+          node -e "
+            const src = require('fs').readFileSync('_site/sw.js', 'utf8');
+            const list = src.match(/const SHELL = \[([\s\S]*?)\];/)[1].match(/'([^']+)'/g).map((s) => s.slice(1, -1));
+            const missing = list.filter((p) => p !== './' && !require('fs').existsSync('_site/' + p));
+            if (missing.length) { console.error('Fehlende Dateien:', missing); process.exit(1); }
+            console.log(list.length + ' Offline-Dateien vorhanden');
+          "
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Veröffentlichen
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5

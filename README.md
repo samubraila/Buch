@@ -1,5 +1,7 @@
 # 📚 LeseWelt – Lesen · Übersetzen · Aussprechen
 
+[![Bauen & Veröffentlichen](https://github.com/samubraila/Buch/actions/workflows/pages.yml/badge.svg)](https://github.com/samubraila/Buch/actions/workflows/pages.yml)
+
 Lese-App für Laptop und Handy. Tippe auf ein Wort → du bekommst sofort die **russische Übersetzung**
 (Zielsprache einstellbar) und hörst die **richtige Aussprache** (Englisch US/UK, Deutsch und weitere Sprachen).
 
@@ -7,6 +9,10 @@ Lese-App für Laptop und Handy. Tippe auf ein Wort → du bekommst sofort die **
 
 **Online (Handy & Laptop):** https://samubraila.github.io/Buch/
 → Auf dem Handy öffnen und „Zum Startbildschirm hinzufügen" / „App installieren" wählen.
+
+<img src="docs/handy-qr.png" alt="QR-Code zur App" width="160">
+
+📱 **Handy-Test Schritt für Schritt: [TESTEN.md](TESTEN.md)**
 
 **Lokal am Laptop:** `start.bat` doppelklicken → der Browser öffnet http://localhost:8080
 
@@ -16,7 +22,7 @@ Falls es nicht lädt: Windows-Firewall fragt beim ersten Start → „Zugriff zu
 
 > Hinweis: Über die WLAN-Adresse funktioniert alles zum Lesen und Übersetzen, aber die
 > **Installation als App** und der **Offline-Modus** brauchen HTTPS – dafür die Online-Adresse
-> (GitHub Pages) oben verwenden. Jeder `git push` auf `main` aktualisiert die Online-Version.
+> (GitHub Pages) oben verwenden. Jeder `git push` auf `main` baut und aktualisiert die Online-Version automatisch (GitHub Actions, ca. 1–2 Min.).
 
 ## So benutzt du die App
 

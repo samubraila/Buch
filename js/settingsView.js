@@ -5,6 +5,7 @@ import { deviceSupported, deviceAvailability, prepareDevice } from './translate.
 import * as db from './db.js';
 import { el, LANGS, langName, toast } from './util.js';
 import { segmented, toggle, field, confirmDialog } from './ui.js';
+import { BUILD } from './version.js';
 
 const TEST = {
   en: 'Hello! This is how English sounds with this voice.',
@@ -132,6 +133,7 @@ export async function openSettings(mount) {
       el('li', {}, el('strong', {}, 'Laptop (Chrome/Edge): '), 'In der Adressleiste auf das Installieren-Symbol ⊕ klicken.'),
       el('li', {}, el('strong', {}, 'Android (Chrome): '), 'Menü ⋮ → „App installieren“ bzw. „Zum Startbildschirm hinzufügen“.'),
       el('li', {}, el('strong', {}, 'iPhone/iPad (Safari): '), 'Teilen-Knopf → „Zum Home-Bildschirm“.')),
+    el('p', { class: 'version' }, 'Version: ', el('strong', {}, BUILD)),
     el('p', { class: 'muted small' }, 'LeseWelt 1.0 · Übersetzung: Google Translate / MyMemory · Wörterbuch: dictionaryapi.dev, Wiktionary'));
 
   root.append(el('header', { class: 'page-head' }, el('div', {}, el('h1', {}, 'Einstellungen'))), look, tr, sp, data, about);
