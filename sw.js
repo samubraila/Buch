@@ -78,6 +78,9 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
+  // Bücher (books/*.epub) nicht zusätzlich im Cache ablegen – sie landen ohnehin in der App-Datenbank
+  if (url.origin === self.location.origin && /\/books\//.test(url.pathname)) return;
+
   // Eigene Dateien: aus dem Netz (aktuell), sonst Cache – im Hintergrund aktualisieren
   if (url.origin === self.location.origin) {
     e.respondWith(

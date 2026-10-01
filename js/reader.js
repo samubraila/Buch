@@ -4,11 +4,11 @@ import * as db from './db.js';
 import { settings, setSetting } from './settings.js';
 import * as popup from './popup.js';
 import { speak, stop as stopSpeech } from './speech.js';
-import { translateText } from './translate.js';
-import { savedWordSet, onVocab } from './vocabStore.js';
+import { translateText, translateWord } from './translate.js';
+import { savedWordSet, onVocab, saveWord } from './vocabStore.js';
 import { addStat } from './statsStore.js';
 import { current as abCurrent, toggle as abToggle } from './audioPlayer.js';
-import { el, escapeHtml, debounce, clamp, wordSegments, sentenceSegments, cleanWord, isMobile, isTouch, langName, LANGS, fmtMinutes, toast, uid } from './util.js';
+import { el, escapeHtml, debounce, clamp, wordSegments, sentenceSegments, cleanWord, isMobile, isTouch, langName, LANGS, fmtMinutes, toast, uid, storedToBlob } from './util.js';
 import { openSheet, segmented, toggle, field } from './ui.js';
 
 const BLOCK_SEL = 'p,h1,h2,h3,h4,h5,h6,li,blockquote,pre,dt,dd,figure,img,table,figcaption';
@@ -41,6 +41,7 @@ const I = {
   speak: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>',
   moon: '<svg viewBox="0 0 24 24"><path d="M19 14.5A7.5 7.5 0 0 1 9.5 5a7.5 7.5 0 1 0 9.5 9.5z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/></svg>',
   trash: '<svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  star: '<svg viewBox="0 0 24 24"><path d="M12 3.5l2.6 5.3 5.9.9-4.2 4.1 1 5.8L12 16.9l-5.3 2.7 1-5.8-4.2-4.1 5.9-.9z" fill="currentColor"/></svg>',
   note: '<svg viewBox="0 0 24 24"><path d="M5 4h14v12l-4 4H5z" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linejoin="round"/><path d="M8.5 9h7M8.5 12.5h5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>',
 };
 
@@ -105,6 +106,7 @@ export async function openReader(bookId, mount, opts = {}) {
     <div class="sel-bar" hidden>
       <button data-act="sel-tr">${I.translate}<span>Übersetzen</span></button>
       <button data-act="sel-speak">${I.speak}<span>Anhören</span></button>
+      <button data-act="sel-vocab">${I.star}<span>Vokabeln</span></button>
       <span class="sel-sep"></span>
       ${COLORS.map((c) => `<button class="sel-color c-${c}" data-act="sel-mark" data-color="${c}" aria-label="${COLOR_NAMES[c]} markieren" title="${COLOR_NAMES[c]} markieren"></button>`).join('')}
     </div>
@@ -247,7 +249,7 @@ export async function openReader(bookId, mount, opts = {}) {
   // ---------- Kapitel rendern ----------
   function imgUrl(key) {
     if (!imgUrls.has(key)) {
-      const blob = content.images?.[key];
+      const blob = storedToBlob(content.images?.[key]);
       imgUrls.set(key, blob ? URL.createObjectURL(blob) : '');
     }
     return imgUrls.get(key);
@@ -869,10 +871,34 @@ export async function openReader(bookId, mount, opts = {}) {
   // Mausklick auf die Farbknöpfe darf die Markierung nicht aufheben
   selBar.addEventListener('mousedown', (e) => e.preventDefault());
 
+  // Markierten Text direkt ins Vokabelheft
+  async function saveSelection() {
+    const text = selText.replace(/\s+/g, ' ').trim();
+    const count = text.split(' ').length;
+    if (!text) return;
+    if (count > 12) { toast('Bitte nur ein Wort oder eine kurze Wendung markieren (höchstens 12 Wörter).'); return; }
+    hideSelBar();
+    getSelection()?.removeAllRanges();
+    const word = count === 1 ? cleanWord(text) : text;
+    const tgt = targetLang();
+    let translation = '';
+    let alts = [];
+    try {
+      const r = count === 1 ? await translateWord(word, lang, tgt) : await translateText(word, lang, tgt);
+      translation = r.text;
+      alts = (r.alts || []).flatMap((a) => a.terms.map((t) => t.word)).slice(0, 6);
+    } catch { /* ohne Übersetzung speichern – wird später ergänzt */ }
+    await saveWord({ word, lang, target: tgt, translation, alts, context: selSentence, bookId: book.id, bookTitle: book.title });
+    addStat('saved');
+    popup.savedToast();
+    markSaved();
+  }
+
   // ---------- Hörbuch-Modus (Vorlesen) ----------
   const tts = { on: false, paused: false, list: [], idx: 0, rate: settings.rate || 1, sleepUntil: 0, sleepChapter: false, sleepTimer: 0 };
   const SLEEP_STEPS = [0, 15, 30, 60, 'ch'];
-  const cover = book.cover ? URL.createObjectURL(book.cover) : null;
+  const coverBlob = storedToBlob(book.cover);
+  const cover = coverBlob ? URL.createObjectURL(coverBlob) : null;
   if (cover) cleanups.push(() => URL.revokeObjectURL(cover));
 
   function listenMode() {
@@ -1173,6 +1199,7 @@ export async function openReader(bookId, mount, opts = {}) {
         break;
       case 'sel-speak': speak(selText, lang).catch(() => {}); break;
       case 'sel-mark': addHighlight(btn.dataset.color); break;
+      case 'sel-vocab': saveSelection(); break;
       default: break;
     }
   });

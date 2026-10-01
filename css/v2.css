@@ -345,3 +345,48 @@ body[data-route='read'] .ab-bar, body[data-route='train'] .ab-bar { display: non
 /* kleines Cover (Weiterlesen): Wörter nicht mitten im Wort umbrechen */
 .cover.small .gen-title { font-size: 0.5rem; overflow-wrap: normal; word-break: normal; hyphens: auto; }
 
+/* =========================================================
+   Version 2.1
+   ========================================================= */
+
+/* Großer "Zu Vokabeln"-Knopf im Wort-Fenster */
+.vocab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 12px 0 10px;
+  border-radius: 999px;
+  border: 1.5px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-weight: 700;
+  font-size: 0.86rem;
+  white-space: nowrap;
+  transition: background-color 0.15s, color 0.15s;
+}
+.vocab-btn svg { width: 18px; height: 18px; fill: none; }
+.vocab-btn:hover { filter: brightness(1.05); }
+.vocab-btn.on { background: var(--accent); color: var(--accent-ink); }
+.vocab-btn.on svg { fill: var(--star); color: var(--star); }
+.lk-head-actions { align-items: center; gap: 4px; }
+.lk-speak .vocab-btn { height: 34px; }
+
+/* Auswahl-Leiste: Stern gelb */
+.sel-bar [data-act='sel-vocab'] svg { color: var(--star); }
+
+/* Entdecken: Cover antippbar, Ladebalken */
+.cat-cover-btn { padding: 0; border: 0; background: none; flex: none; border-radius: 6px; cursor: pointer; }
+.cat-cover-btn .cover { width: 76px; }
+.cat-progress { height: 4px; margin-top: 8px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.cat-progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width 0.2s; }
+.cat-meta .btn:disabled { opacity: 1; cursor: progress; }
+
+/* Fehlermeldung beim Laden */
+.load-error p { margin: 0 0 12px; line-height: 1.5; }
+.load-error .row { margin: 6px 0 14px; }
+.err-details summary { cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+.err-details pre, .diag pre { white-space: pre-wrap; word-break: break-word; font-size: 0.75rem; background: var(--surface-2); padding: 10px; border-radius: 10px; max-height: 240px; overflow: auto; }
+.diag-item { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
+.diag-item small { color: var(--muted); display: block; }
+

@@ -3,7 +3,7 @@ import { settings, setSetting } from './settings.js';
 import { onVoices, voicesFor, bestVoice, speak, speechLang, hasSynth } from './speech.js';
 import { deviceSupported, deviceAvailability, prepareDevice } from './translate.js';
 import * as db from './db.js';
-import { el, LANGS, langName, toast } from './util.js';
+import { el, LANGS, langName, toast, getErrorLog, clearErrorLog } from './util.js';
 import { segmented, toggle, field, confirmDialog } from './ui.js';
 import { BUILD } from './version.js';
 import { APP_VERSION } from './changelog.js';
@@ -172,6 +172,29 @@ export async function openSettings(mount) {
       el('button', { class: 'btn', onclick: showChangelog }, '✨ Was ist neu'),
       el('a', { class: 'btn', href: '#/stats' }, '📈 Statistik')));
 
+  // ---- Hilfe & Diagnose ----
+  const diagList = el('div', { class: 'diag' });
+  function drawDiag() {
+    const log = getErrorLog();
+    diagList.replaceChildren(log.length
+      ? el('div', {}, ...log.slice(0, 10).map((e) => el('div', { class: 'diag-item' },
+        el('strong', {}, e.context), el('div', {}, e.msg), el('small', {}, new Date(e.t).toLocaleString('de-DE')))))
+      : el('p', { class: 'muted' }, 'Keine Fehler aufgezeichnet 👍'));
+  }
+  const diagText = () => [
+    `LeseWelt ${APP_VERSION} (${BUILD})`, `Browser: ${navigator.userAgent}`, `Online: ${navigator.onLine}`,
+    `Bildschirm: ${innerWidth}×${innerHeight}`, '', 'Letzte Fehler:',
+    ...getErrorLog().map((e) => `${e.t} | ${e.context} | ${e.msg}`),
+  ].join('\n');
+  const diag = el('section', { class: 'card-sec' }, el('h2', {}, 'Hilfe & Diagnose'),
+    el('p', { class: 'muted small' }, 'Wenn etwas nicht klappt: „Bericht kopieren“ und an den Entwickler schicken. Es werden keine Bücher oder persönlichen Daten mitgeschickt.'),
+    diagList,
+    el('div', { class: 'row wrap' },
+      el('button', { class: 'btn', onclick: async () => {
+        try { await navigator.clipboard.writeText(diagText()); toast('Bericht kopiert ✓'); } catch { toast('Kopieren nicht möglich', { type: 'error' }); }
+      } }, '📋 Bericht kopieren'),
+      el('button', { class: 'btn', onclick: () => { clearErrorLog(); drawDiag(); } }, 'Liste leeren')));
+  drawDiag();
   const about = el('section', { class: 'card-sec' }, el('h2', {}, 'Als App installieren'),
     el('ul', { class: 'howto' },
       el('li', {}, el('strong', {}, 'Laptop (Chrome/Edge): '), 'In der Adressleiste auf das Installieren-Symbol ⊕ klicken.'),
@@ -179,7 +202,7 @@ export async function openSettings(mount) {
       el('li', {}, el('strong', {}, 'iPhone/iPad (Safari): '), 'Teilen-Knopf → „Zum Home-Bildschirm“.')),
     el('p', { class: 'muted small' }, 'Übersetzung: Google Translate / MyMemory · Wörterbuch: dictionaryapi.dev, Wiktionary · Bücher: Standard Ebooks, Project Gutenberg · Hörbücher: LibriVox'));
 
-  root.append(el('header', { class: 'page-head' }, el('div', {}, el('h1', {}, 'Einstellungen'))), updates, look, tr, sp, transfer, data, about);
+  root.append(el('header', { class: 'page-head' }, el('div', {}, el('h1', {}, 'Einstellungen'))), updates, look, tr, sp, transfer, data, diag, about);
   refreshDevice();
   const off = onVoices(drawVoices);
   drawVoices();

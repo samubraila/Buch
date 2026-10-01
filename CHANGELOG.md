@@ -1,5 +1,28 @@
 # Neuigkeiten
 
+## Version 2.1 – 01.10.2026
+
+**📱 Bücher laden auf dem iPhone**
+- Behoben: Auf dem iPhone (Safari) ließen sich Bücher mit Bildern nicht laden („Error preparing Blob/File data…“).
+  Cover und Bilder werden jetzt in einem Format gespeichert, das alle Browser können.
+
+**📚 Entdecken – zuverlässiger**
+- Alle Bücher aus „Entdecken“ werden beim Bauen auf GitHub mitveröffentlicht und kommen jetzt vom **eigenen Server**
+  (nicht mehr von fremden Seiten) – schneller und funktioniert auch, wenn eine Seite gesperrt ist
+- **Ein Tipp auf „📖 Lesen“** lädt das Buch und öffnet es sofort (mit Ladebalken)
+- 12 neue englische Bücher, vor allem leichte: Peter Rabbit, The Velveteen Rabbit, Aesop, Grimm, Andersen, Doctor Dolittle,
+  Pinocchio, The Railway Children, Heidi, Peter Pan, Black Beauty, Anne of Green Gables
+- Deutsche Bücher jetzt als schöne EPUBs mit Cover; neu: Heidi, Siddhartha, Effi Briest
+
+**⭐ Schneller zu den Vokabeln**
+- Großer Knopf **„Zu Vokabeln“** im Wort-Fenster
+- Text markieren → **„⭐ Vokabeln“** speichert Wort oder Wendung samt Übersetzung und Satz
+- Nach dem Speichern: „Vokabeln öffnen“
+
+**🩺 Hilfe bei Problemen**
+- Klare Fehlermeldung mit „Erneut versuchen“ und „Fehlerbericht kopieren“
+- Einstellungen → **Hilfe & Diagnose**: letzte Fehler ansehen und als Bericht kopieren
+
 ## Version 2.0 – 30.09.2026
 
 **🔄 Immer die neueste Version**

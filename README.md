@@ -6,7 +6,7 @@ Lese- und Sprachlern-App für Laptop und Handy. Tippe auf ein Wort → sofort di
 (Zielsprache einstellbar) und die **richtige Aussprache**. Bücher kannst du dir auch **vorlesen lassen**
 oder **echte Hörbücher** hören.
 
-**Version 2.0** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
+**Version 2.1** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
 
 ## Starten
 
@@ -79,5 +79,6 @@ js/train.js         Training (5 Arten)
 js/stats*.js        Statistik & Tagesziel
 js/backup.js        Sichern & Übertragen
 js/parsers/*        EPUB, FB2, PDF, TXT/HTML
+tools/fetch-books.mjs   lädt beim Bauen alle „Entdecken“-Bücher, damit die App sie vom eigenen Server holt
 .github/workflows/pages.yml   Automatischer Build & Veröffentlichung
 ```

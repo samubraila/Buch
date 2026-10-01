@@ -3,7 +3,7 @@ import { loadSettings } from './settings.js';
 import { dueWords, onVocab } from './vocabStore.js';
 import { importFile, importText } from './importer.js';
 import { initUpdates, announceUpdate } from './update.js';
-import { toast } from './util.js';
+import { toast, logError } from './util.js';
 
 const view = document.getElementById('view');
 let cleanup = null;
@@ -81,6 +81,10 @@ async function start() {
 
   initUpdates();
 }
+
+// Unerwartete Fehler für 'Hilfe & Diagnose' merken
+window.addEventListener('error', (e) => logError('Fehler', e.error || e.message));
+window.addEventListener('unhandledrejection', (e) => logError('Fehler (async)', e.reason));
 
 window.addEventListener('offline', () => toast('Offline – bereits übersetzte Wörter funktionieren weiter.'));
 window.addEventListener('online', () => toast('Wieder online ✓'));

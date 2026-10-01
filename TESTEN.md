@@ -42,9 +42,10 @@ Einfach der Reihe nach durchgehen und abhaken:
 - [ ] Nach links/rechts **wischen** → Seite blättert um
 - [ ] **Mitte antippen** → Menüleisten erscheinen/verschwinden
 
-**📚 Entdecken (neu)**
-- [ ] Unten **„Entdecken"** → Reiter **Englisch** → z. B. „The Wonderful Wizard of Oz" → **Laden** → **Lesen**
-- [ ] Reiter **Deutsch** → „Die Verwandlung" laden
+**📚 Entdecken**
+- [ ] Unten **„Entdecken"** → Reiter **Englisch** → z. B. „The Tale of Peter Rabbit" → **📖 Lesen** → Buch öffnet sich direkt (mit Bildern)
+- [ ] Reiter **Deutsch** → „Die Verwandlung" → **📖 Lesen**
+- [ ] Zurück zu Entdecken → beim selben Buch steht jetzt **„📖 Weiterlesen"**
 - [ ] Reiter **Suchen** → „Sherlock" eingeben → Buch laden
 - [ ] Reiter **Hörbücher** → ein Hörbuch **▶ Anhören** → Player öffnet sich, unten erscheint die Mini-Leiste
 
@@ -68,7 +69,9 @@ Einfach der Reihe nach durchgehen und abhaken:
 - [ ] **☰** → Reiter **Lesezeichen** / **Markierungen** → Notiz hinzufügen
 
 **Vokabeln & Training**
-- [ ] In der Wort-Karte **⭐** → Wort im Vokabelheft, im Text unterstrichen
+- [ ] In der Wort-Karte oben **„☆ Zu Vokabeln"** → wird zu **„★ In Vokabeln"**, unten erscheint „Vokabeln öffnen"
+- [ ] Mehrere Wörter markieren (lange drücken) → in der Leiste **„⭐ Vokabeln"** → Wendung samt Übersetzung gespeichert
+- [ ] Das Wort ist im Text jetzt **gepunktet unterstrichen**
 - [ ] **Vokabeln → Trainieren** → alle 5 Arten ausprobieren: Karteikarten, Auswahl, Hören, Schreiben, Sprechen
 
 **📈 Statistik (neu)**
@@ -93,7 +96,8 @@ Einfach der Reihe nach durchgehen und abhaken:
 | **Vorlesen stoppt bei ausgeschaltetem Bildschirm** | Leser → **Aa** → „Stimme beim Anhören" → **Online** |
 | **„Nachsprechen" fehlt** | Spracherkennung gibt es nur in Chrome (Android) und Safari (iPhone) |
 | **„Übersetzung nicht erreichbar"** | Internet prüfen, kurz warten, **„Erneut versuchen"** |
-| **Buch lädt nicht bei „Entdecken"** | Internet prüfen – große Bücher brauchen ein paar Sekunden |
+| **Buch lädt nicht bei „Entdecken"** | Im Fenster **„↻ Erneut versuchen"**. Klappt es nicht: **„📋 Fehlerbericht kopieren"** und an mich schicken |
+| **Irgendetwas anderes geht nicht** | Einstellungen → **Hilfe & Diagnose** → **„📋 Bericht kopieren"** und schicken |
 | **Alte Version** | App ganz schließen und neu öffnen, oder Einstellungen → **„Nach Updates suchen"** |
 | **„App installieren" fehlt** | Android: Chrome verwenden. iPhone: **Safari** verwenden |
 

@@ -159,3 +159,23 @@ Ziel: Aus dem Leser wird eine richtige **Sprachlern-App zum Lesen**, und das Han
 - Auto-Update getestet: offene App wechselt ohne Zutun auf die neue Version; beim Lesen/Trainieren erscheint nur „Update bereit"
 - Neuigkeiten: [CHANGELOG.md](CHANGELOG.md) · Handy-Test: [TESTEN.md](TESTEN.md)
 
+
+---
+
+# 🔧 Version 2.1 – Bücher laden repariert & Vokabeln schneller
+
+**Problem (Rückmeldung vom Handy):** Bücher aus „Entdecken“ ließen sich nicht herunterladen/lesen.
+**Ursache (mit iPhone-Engine WebKit nachgestellt):** Safari kann Bilder (Blobs) nicht in der App-Datenbank speichern →
+jedes Buch mit Cover/Bildern scheiterte mit „Error preparing Blob/File data to be stored in object store“.
+
+## 17. Umsetzung
+1. ✅ Cover und Bilder als ArrayBuffer speichern (funktioniert in allen Browsern, alte Bücher bleiben lesbar)
+2. ✅ Bücher vom eigenen Server: GitHub Actions lädt alle „Entdecken“-Bücher beim Bauen herunter
+   (`tools/fetch-books.mjs`, mit Zwischenspeicher) und veröffentlicht sie unter `books/`
+3. ✅ „📖 Lesen“: ein Tipp lädt und öffnet das Buch, mit Ladebalken; mehrere Quellen nacheinander (eigener Server → Original-Seite)
+4. ✅ Mehr Bücher: 12 englische (vor allem leichte) + Heidi, Siddhartha, Effi Briest; deutsche Bücher als EPUB mit Cover;
+   Gutenberg-Lizenztext wird automatisch ausgeblendet
+5. ✅ Wunsch: großer Knopf „Zu Vokabeln“ im Wort-Fenster und „⭐ Vokabeln“ beim Markieren von Text
+6. ✅ Fehler verständlich anzeigen, „Erneut versuchen“, „Hilfe & Diagnose“ mit Bericht zum Kopieren
+7. ✅ Getestet mit iPhone-Engine (WebKit) und Chrome
+

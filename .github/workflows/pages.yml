@@ -55,6 +55,18 @@ jobs:
             console.log(list.length + ' Offline-Dateien vorhanden');
           "
 
+      # Bücher für "Entdecken" mitveröffentlichen (books/*.epub) – die App lädt sie dann vom eigenen
+      # Server statt von fremden Seiten. Zwischenspeicher: jedes Buch wird nur einmal heruntergeladen.
+      - name: Bücher-Zwischenspeicher
+        uses: actions/cache@v6
+        with:
+          path: .books-cache
+          key: books-${{ hashFiles('js/catalogData.js') }}
+          restore-keys: books-
+
+      - name: Bücher für „Entdecken" laden
+        run: node tools/fetch-books.mjs --cache .books-cache --out _site/books
+
       - uses: actions/configure-pages@v6
 
       - uses: actions/upload-pages-artifact@v5

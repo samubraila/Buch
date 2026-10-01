@@ -216,6 +216,43 @@ export async function downscaleImage(blob, maxW = 420) {
   }
 }
 
+// ---------- Binärdaten speichern (Safari kann keine Blobs in IndexedDB ablegen) ----------
+
+/** Blob -> { type, data: ArrayBuffer } (in allen Browsern speicherbar) */
+export async function blobToStored(blob) {
+  if (!blob) return null;
+  if (blob.data && !(blob instanceof Blob)) return blob; // schon umgewandelt
+  return { type: blob.type || 'application/octet-stream', data: await blob.arrayBuffer() };
+}
+
+/** gespeicherte Daten (alt: Blob, neu: {type, data}) -> Blob */
+export function storedToBlob(s) {
+  if (!s) return null;
+  if (s instanceof Blob) return s;
+  if (s.data) return new Blob([s.data], { type: s.type || 'application/octet-stream' });
+  return null;
+}
+
+// ---------- Fehlerprotokoll (für "Diagnose" in den Einstellungen) ----------
+
+export function logError(context, err) {
+  const msg = err?.message || String(err);
+  console.warn('[LeseWelt]', context, err);
+  try {
+    const list = JSON.parse(localStorage.getItem('lw-errors') || '[]');
+    list.unshift({ t: new Date().toISOString(), context, msg: msg.slice(0, 500), name: err?.name || '' });
+    localStorage.setItem('lw-errors', JSON.stringify(list.slice(0, 30)));
+  } catch { /* ignorieren */ }
+}
+
+export function getErrorLog() {
+  try { return JSON.parse(localStorage.getItem('lw-errors') || '[]'); } catch { return []; }
+}
+
+export function clearErrorLog() {
+  try { localStorage.removeItem('lw-errors'); } catch { /* ignorieren */ }
+}
+
 export function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();

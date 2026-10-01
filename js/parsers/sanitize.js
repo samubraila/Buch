@@ -40,6 +40,9 @@ function convert(node, opt) {
   if (node.nodeType !== 1) return null;
   let tag = localName(node);
   if (DROP.has(tag)) return null;
+  // Project-Gutenberg-Kopf und -Lizenz (EPUB) weglassen
+  const idAttr = node.getAttribute?.('id') || '';
+  if (/^pg-(header|footer)$/.test(idAttr) || /\bpg-boilerplate\b/.test(node.getAttribute?.('class') || '')) return null;
 
   // SVG mit Bild (typisch für EPUB-Cover) -> <img>
   if (tag === 'svg') {

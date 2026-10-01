@@ -132,7 +132,7 @@ export async function openWord(o) {
         <div class="lk-ipa" data-slot="ipa"></div>
       </div>
       <div class="lk-head-actions">
-        <button class="icon-btn lk-star ${saved ? 'on' : ''}" data-act="save" aria-pressed="${!!saved}" title="Ins Vokabelheft">${ICON.star}</button>
+        <button class="vocab-btn ${saved ? 'on' : ''}" data-act="save" aria-pressed="${!!saved}" title="Wort ins Vokabelheft speichern">${ICON.star}<span>${saved ? 'In Vokabeln' : 'Zu Vokabeln'}</span></button>
         <button class="icon-btn" data-act="close" title="Schließen (Esc)">${ICON.close}</button>
       </div>
     </header>
@@ -190,6 +190,8 @@ export async function openWord(o) {
       const btn = e.target.closest('[data-act]');
       const on = btn.classList.toggle('on');
       btn.setAttribute('aria-pressed', on);
+      const lbl = btn.querySelector('span');
+      if (lbl) lbl.textContent = on ? 'In Vokabeln' : 'Zu Vokabeln';
       if (on) {
         await saveWord({
           word: o.word, lang: src, target: tgt,
@@ -198,7 +200,7 @@ export async function openWord(o) {
           ipa: enData?.ipa || '',
           context: o.sentence || '', bookId: o.bookId, bookTitle: o.bookTitle,
         });
-        toast('Im Vokabelheft gespeichert ⭐');
+        savedToast();
         addStat('saved');
       } else {
         await removeWord(vocabId(o.word, src));
@@ -302,6 +304,10 @@ export async function openWord(o) {
   if (settings.autoSentence && o.sentence) loadSentence();
 }
 
+export function savedToast() {
+  toast('In Vokabeln gespeichert ⭐', { action: { label: 'Vokabeln öffnen', fn: () => { location.hash = '#/vocab'; } } });
+}
+
 function speechErr(e) {
   toast('Aussprache nicht möglich: ' + (e?.message || 'unbekannter Fehler'), { type: 'error' });
 }
@@ -335,7 +341,7 @@ export async function openPhrase(o) {
   const src = o.lang || 'en';
   const tgt = targetFor(src);
   const text = o.text.replace(/\s+/g, ' ').trim();
-  const short = text.split(' ').length <= 4;
+  const short = text.split(' ').length <= 8;
   b.innerHTML = `
     <div class="lk-grip" aria-hidden="true"></div>
     <header class="lk-head">
@@ -347,7 +353,7 @@ export async function openPhrase(o) {
     <div class="lk-speak">
       <button class="chip-btn primary" data-act="speak">${ICON.speak}<span>Vorlesen</span></button>
       <button class="chip-btn" data-act="slow">${ICON.slow}<span>Langsam</span></button>
-      ${short ? `<button class="chip-btn" data-act="save">${ICON.star}<span>Speichern</span></button>` : ''}
+      ${short ? `<button class="vocab-btn" data-act="save">${ICON.star}<span>Zu Vokabeln</span></button>` : ''}
       <button class="chip-btn" data-act="copy">${ICON.copy}<span>Kopieren</span></button>
     </div>
     <section class="lk-sec">
@@ -373,8 +379,11 @@ export async function openPhrase(o) {
     }
     if (act === 'save') {
       await saveWord({ word: text, lang: src, target: tgt, translation: result?.text || '', alts: [], context: o.sentence || '', bookId: o.bookId, bookTitle: o.bookTitle });
-      e.target.closest('[data-act]').classList.add('on');
-      toast('Im Vokabelheft gespeichert ⭐');
+      const sb = e.target.closest('[data-act]');
+      sb.classList.add('on');
+      if (sb.querySelector('span')) sb.querySelector('span').textContent = 'In Vokabeln';
+      savedToast();
+      addStat('saved');
       o.onSaved?.();
     }
     if (act === 'retry') load();

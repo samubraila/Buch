@@ -2,7 +2,7 @@
 import * as db from './db.js';
 import { importFile, importText, deleteBook, saveParsed, ACCEPT } from './importer.js';
 import { SAMPLES } from './samples.js';
-import { el, coverColors, langName, toast, fmtMinutes } from './util.js';
+import { el, coverColors, langName, toast, fmtMinutes, storedToBlob } from './util.js';
 import { openSheet, confirmDialog } from './ui.js';
 import { getDay, streak } from './statsStore.js';
 import { goalRing, minutes } from './stats.js';
@@ -18,8 +18,9 @@ const I = {
 export async function openLibrary(mount) {
   const urls = [];
   const coverUrl = (b) => {
-    if (!b.cover) return '';
-    const u = URL.createObjectURL(b.cover);
+    const blob = storedToBlob(b.cover);
+    if (!blob) return '';
+    const u = URL.createObjectURL(blob);
     urls.push(u);
     return u;
   };

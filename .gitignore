@@ -11,3 +11,8 @@ desktop.ini
 
 # Claude-Einstellungen
 .claude/
+
+# Bücher werden beim Bauen auf GitHub geladen (tools/fetch-books.mjs)
+books/
+.books-cache/
+

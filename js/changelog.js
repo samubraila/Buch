@@ -1,7 +1,19 @@
 // Neuigkeiten je Version (wird nach einem Update angezeigt)
-export const APP_VERSION = '2.0';
+export const APP_VERSION = '2.1';
 
 export const CHANGELOG = [
+  {
+    version: '2.1',
+    date: '01.10.2026',
+    items: [
+      '📱 iPhone: Bücher mit Bildern lassen sich jetzt laden und lesen (Speicherfehler in Safari behoben)',
+      '📚 Entdecken: Bücher kommen jetzt vom eigenen Server – zuverlässiger und schneller',
+      '📖 Ein Tipp auf „Lesen“ lädt das Buch und öffnet es sofort',
+      '✨ 12 neue englische Bücher, vor allem leichte (Peter Rabbit, Aesop, Grimm, Andersen, Pinocchio …), und 3 neue deutsche (Heidi, Siddhartha, Effi Briest)',
+      '⭐ Großer Knopf „Zu Vokabeln“ im Wort-Fenster und beim Markieren von Text',
+      '🩺 Klare Fehlermeldungen mit „Erneut versuchen“ und „Hilfe & Diagnose“ in den Einstellungen',
+    ],
+  },
   {
     version: '2.0',
     date: '30.09.2026',

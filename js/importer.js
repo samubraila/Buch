@@ -1,6 +1,6 @@
 // Bücher importieren und in IndexedDB speichern
 import * as db from './db.js';
-import { uid, detectLang, normLang, downscaleImage } from './util.js';
+import { uid, detectLang, normLang, downscaleImage, blobToStored, logError } from './util.js';
 import { textToBook } from './parsers/text.js';
 
 export const ACCEPT = '.epub,.fb2,.zip,.txt,.text,.md,.html,.htm,.xhtml,.pdf';
@@ -94,7 +94,10 @@ export async function saveParsed(parsed, { format, fileKey, name } = {}) {
   const lang = normLang(parsed.lang) || detectLang(sample);
 
   const id = uid();
-  const cover = parsed.cover ? await downscaleImage(parsed.cover) : null;
+  // Als ArrayBuffer speichern – Safari (iPhone) kann keine Blobs in IndexedDB ablegen
+  const cover = parsed.cover ? await blobToStored(await downscaleImage(parsed.cover)) : null;
+  const images = {};
+  for (const [k, blob] of Object.entries(parsed.images || {})) images[k] = await blobToStored(blob);
   const book = {
     id,
     title: (parsed.title || name || 'Ohne Titel').trim(),
@@ -110,13 +113,28 @@ export async function saveParsed(parsed, { format, fileKey, name } = {}) {
     lastRead: 0,
     pos: { ch: 0, blk: 0, pct: 0 },
   };
-  await db.put('contents', { id, chapters: parts.map((p) => ({ html: p.html, path: p.path })), images: parsed.images || {} });
-  await db.put('books', book);
+  try {
+    await db.put('contents', { id, chapters: parts.map((p) => ({ html: p.html, path: p.path })), images });
+    await db.put('books', book);
+  } catch (e) {
+    await db.del('contents', id).catch(() => {});
+    if (e?.name === 'QuotaExceededError') throw new Error('Kein Speicherplatz mehr frei – bitte alte Bücher löschen.');
+    throw new Error('Speichern fehlgeschlagen: ' + (e?.message || e));
+  }
   db.requestPersist();
   return book;
 }
 
 export async function importFile(file, onProgress = () => {}) {
+  try {
+    return await importFileInner(file, onProgress);
+  } catch (e) {
+    logError(`Import: ${file.name}`, e);
+    throw e;
+  }
+}
+
+async function importFileInner(file, onProgress) {
   const fileKey = `${file.name}|${file.size}`;
   const existing = (await db.getAll('books')).find((b) => b.fileKey === fileKey);
   if (existing) return { book: existing, existed: true };
@@ -131,22 +149,14 @@ export async function importText(text, title) {
   return saveParsed(parsed, { format: 'txt', fileKey: 'paste|' + Date.now() });
 }
 
-/**
- * Buch aus dem Internet laden (Katalog "Entdecken").
- * @param {object} o { url, key, title, author, lang, name, onProgress }
- */
-export async function importFromUrl({ url, key, title, author, lang, name, onProgress = () => {} }) {
-  const fileKey = 'url|' + (key || url);
-  const existing = (await db.getAll('books')).find((b) => b.fileKey === fileKey);
-  if (existing) return { book: existing, existed: true };
-
+async function download(url, onProgress) {
   let res;
   try {
-    res = await fetch(url);
-  } catch {
-    throw new Error('Download fehlgeschlagen – bitte Internetverbindung prüfen.');
+    res = await fetch(url, { cache: 'no-store' });
+  } catch (e) {
+    throw new Error(`Keine Verbindung zu ${new URL(url, location.href).hostname} (${e.message || 'Netzwerkfehler'})`);
   }
-  if (!res.ok) throw new Error(`Download fehlgeschlagen (${res.status})`);
+  if (!res.ok) throw new Error(`${new URL(url, location.href).hostname} antwortet mit Fehler ${res.status}`);
   const total = Number(res.headers.get('content-length')) || 0;
   const chunks = [];
   let loaded = 0;
@@ -157,20 +167,49 @@ export async function importFromUrl({ url, key, title, author, lang, name, onPro
       if (done) break;
       chunks.push(value);
       loaded += value.length;
-      onProgress(total ? Math.min(0.95, (loaded / total) * 0.9) : 0.3, loaded);
+      onProgress(total ? Math.min(0.9, (loaded / total) * 0.9) : Math.min(0.85, loaded / 3e6), loaded);
     }
   } else {
-    chunks.push(new Uint8Array(await res.arrayBuffer()));
+    const buf = new Uint8Array(await res.arrayBuffer());
+    chunks.push(buf);
+    loaded = buf.length;
   }
-  const file = new File(chunks, name, { type: res.headers.get('content-type') || '' });
-  const parsed = await parse(file, (p) => onProgress(0.9 + p * 0.1, loaded));
-  if (title) parsed.title = title;
-  if (author) parsed.author = author;
-  if (lang) parsed.lang = lang;
-  const book = await saveParsed(parsed, { format: kind(file), fileKey, name });
-  return { book, existed: false };
+  if (!loaded) throw new Error('Die Datei ist leer');
+  return { chunks, type: res.headers.get('content-type') || '' };
 }
 
+/**
+ * Buch aus dem Internet laden (Katalog "Entdecken").
+ * Probiert mehrere Quellen nacheinander (z. B. eigener Server, dann Original-Seite).
+ * @param {object} o { sources: [{ url, name }], key, title, author, lang, onProgress }
+ */
+export async function importFromUrl({ sources, url, name, key, title, author, lang, onProgress = () => {} }) {
+  const list = sources?.length ? sources : [{ url, name }];
+  const fileKey = 'url|' + (key || list[0].url);
+  const existing = (await db.getAll('books')).find((b) => b.fileKey === fileKey);
+  if (existing) return { book: existing, existed: true };
+
+  const errors = [];
+  for (const src of list) {
+    try {
+      const { chunks, type } = await download(src.url, onProgress);
+      const file = new File(chunks, src.name, { type });
+      const parsed = await parse(file, (p) => onProgress(0.9 + p * 0.1));
+      if (title) parsed.title = title;
+      if (author) parsed.author = author;
+      if (lang) parsed.lang = lang;
+      const book = await saveParsed(parsed, { format: kind(file), fileKey, name: src.name });
+      return { book, existed: false };
+    } catch (e) {
+      errors.push(e.message);
+      // Speicherfehler: andere Quelle hilft nicht
+      if (/Speicher/.test(e.message)) break;
+    }
+  }
+  const err = new Error(errors[errors.length - 1] || 'Download fehlgeschlagen');
+  err.details = errors;
+  throw err;
+}
 export async function deleteBook(id) {
   await db.del('books', id);
   await db.del('contents', id);

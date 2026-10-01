@@ -2,6 +2,7 @@
 import * as db from './db.js';
 import { loadJSZip } from './parsers/epub.js';
 import { BUILD } from './version.js';
+import { storedToBlob } from './util.js';
 
 const FORMAT = 'lesewelt-backup-1';
 
@@ -25,15 +26,16 @@ export async function createBackup(onProgress = () => {}) {
     onProgress(i / Math.max(1, books.length));
     const b = books[i];
     const { cover, ...meta } = b;
-    if (cover) zip.file(`covers/${b.id}.jpg`, cover);
-    manifest.books.push({ ...meta, hasCover: !!cover });
+    const coverBlob = storedToBlob(cover);
+    if (coverBlob) zip.file(`covers/${b.id}.jpg`, coverBlob);
+    manifest.books.push({ ...meta, hasCover: !!coverBlob, coverType: coverBlob?.type || 'image/jpeg' });
     const content = await db.get('contents', b.id);
     if (!content) continue;
     const imageKeys = Object.keys(content.images || {});
-    for (const k of imageKeys) zip.file(`images/${b.id}/${k}`, content.images[k]);
+    for (const k of imageKeys) { const ib = storedToBlob(content.images[k]); if (ib) zip.file(`images/${b.id}/${k}`, ib); }
     zip.file(`contents/${b.id}.json`, JSON.stringify({
       chapters: content.chapters,
-      images: imageKeys.map((k) => ({ key: k, type: content.images[k].type })),
+      images: imageKeys.map((k) => ({ key: k, type: content.images[k]?.type || 'image/*' })),
     }));
   }
   zip.file('lesewelt.json', JSON.stringify(manifest));
@@ -61,7 +63,8 @@ export async function restoreBackup(file, onProgress = () => {}) {
   let updated = 0;
   for (let i = 0; i < manifest.books.length; i++) {
     onProgress(i / Math.max(1, manifest.books.length));
-    const { hasCover, ...meta } = manifest.books[i];
+    const { hasCover, coverType, ...rest } = manifest.books[i];
+    const meta = { ...rest, coverType };
     const old = existing.get(meta.id);
     if (old) {
       // Fortschritt übernehmen, wenn die Sicherung neuer ist
@@ -74,12 +77,13 @@ export async function restoreBackup(file, onProgress = () => {}) {
     const images = {};
     for (const im of c.images || []) {
       const f = zip.file(`images/${meta.id}/${im.key}`);
-      if (f) images[im.key] = new Blob([await f.async('arraybuffer')], { type: im.type || 'image/*' });
+      if (f) images[im.key] = { type: im.type || 'image/*', data: await f.async('arraybuffer') };
     }
     let cover = null;
     const cov = hasCover && zip.file(`covers/${meta.id}.jpg`);
-    if (cov) cover = new Blob([await cov.async('arraybuffer')], { type: 'image/jpeg' });
+    if (cov) cover = { type: meta.coverType || 'image/jpeg', data: await cov.async('arraybuffer') };
     await db.put('contents', { id: meta.id, chapters: c.chapters, images });
+    delete meta.coverType;
     await db.put('books', { ...meta, cover });
     added++;
   }
