@@ -2,7 +2,7 @@
 import * as db from './db.js';
 import { EN_BOOKS, DE_BOOKS, SEARCH_LANGS, LIBRIVOX_LANGS } from './catalogData.js';
 import { importFromUrl } from './importer.js';
-import { playBook, loadLibrivox, recentAudiobooks } from './audioPlayer.js';
+import { playBook, loadLibrivox, recentAudiobooks, unlock as unlockAudioPlayer } from './audioPlayer.js';
 import { el, coverColors, langName, toast, fetchWithTimeout, logError } from './util.js';
 import { openSheet } from './ui.js';
 
@@ -232,6 +232,7 @@ export async function openCatalog(mount, tab = 'en', query = '') {
     const playCard = ({ id, title, author, extra, btnLabel }) => {
       const btn = el('button', { class: 'btn small primary' }, btnLabel || '▶ Anhören');
       const go = async () => {
+        unlockAudioPlayer(); // iPhone: Ton noch während des Tippens freischalten
         btn.disabled = true;
         btn.textContent = 'Lädt …';
         try {

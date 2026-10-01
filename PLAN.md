@@ -224,3 +224,47 @@ Ziel: Beim Lesen nicht nur die Übersetzung sehen, sondern auch **die Grammatik*
 - Geprüfte Beispiele: ging → gehen – ging – ist gegangen · Häuser → das Haus · die Häuser · Mutter → die Mutter · die Mütter ·
   lief → laufen – lief – ist gelaufen · went → go – went – gone · children → child
 
+
+---
+
+# 🎧 Version 2.3 – Bücher hören (Englisch & alle Sprachen) + neue Funktionen
+
+Wunsch: „Bücher auch auf Englisch zuhören“ – einfach, zuverlässig, auch auf dem iPhone. Dazu weitere interessante Funktionen.
+
+## 23. Neuer Bereich „🎧 Hören“ (eigener Reiter unten)
+- **Weiterhören:** die Bücher, die du zuletzt gehört hast – ein Tipp und es geht genau an der Stelle weiter
+- **Deine Bücher anhören:** jedes Buch aus der Bibliothek mit ▶
+- **Echte Hörbücher** (LibriVox, von Menschen gelesen)
+
+## 24. Vollbild-Hörplayer (wie eine Hörbuch-App)
+- Großes Cover, Titel, Kapitel, Fortschritt
+- **Mitlesen im Karaoke-Stil:** der aktuelle Satz groß, das gesprochene Wort wird markiert
+- **Übersetzung des Satzes** darunter (Russisch), ein- und ausblendbar; optional auch vorlesen (+RU)
+- **Wort im Satz antippen** → Übersetzung, Grammatik, „Zu Vokabeln“
+- Steuerung: Satz zurück/vor, Kapitel zurück/vor, Tempo, 🌙 Schlaf-Timer, Kapitelliste
+- **Stimme wählen:** Englisch amerikanisch/britisch, Online-Stimme (natürlich, läuft bei ausgeschaltetem Bildschirm) oder Gerätestimme
+- Merkt sich die Hör-Position pro Buch; „📖 Im Buch weiterlesen“ springt zur gleichen Stelle
+- Sperrbildschirm-Steuerung; nächster Satz wird vorab geladen (ohne Pausen)
+- Hinweis, wenn es das Buch auch als **echtes Hörbuch** gibt
+
+## 25. Zuverlässiger auf dem iPhone
+- Stimme wird beim ersten Tippen „freigeschaltet“ (Safari erlaubt Ton nur nach einer Berührung)
+- Wenn die Online-Stimme nicht antwortet: automatisch Gerätestimme, mit Hinweis statt Stille
+
+## 26. Weitere neue Funktionen
+- **Nachschlagen ohne Buch:** im Vokabelheft ein Wort oder Satz eintippen → Übersetzung, Aussprache, Grammatik, speichern
+- **Diktat-Training:** die App spricht einen Satz aus deinen Vokabeln, du schreibst ihn – Wort für Wort ausgewertet
+- **🏆 Erfolge:** Abzeichen für Serien, gelesene Bücher, gelernte Wörter, Lese- und Hörzeit – mit Hinweis, wenn du ein neues freischaltest
+- Statistik zählt jetzt auch die **Hörzeit**
+
+## Umsetzung Version 2.3 (Reihenfolge)
+1. Hör-Engine (Sätze aus dem Buch, Online-/Gerätestimme, Vorladen, Karaoke, Merken der Position)
+2. Vollbild-Player + Bereich „Hören“ + Reiter in der Navigation
+3. Nachschlagen im Vokabelheft, Diktat-Training, Erfolge
+4. Tests (Chrome + iPhone-Engine), Doku, Push → GitHub baut → Online-Test
+
+**Stand Version 2.3: ✅ umgesetzt und getestet (01.10.2026)**
+- Punkte 23–26 eingebaut; getestet mit Chrome und iPhone-Engine (WebKit): Online-Stimme spielt, Wort-Markierung läuft,
+  Übersetzung erscheint, Wort antippen pausiert, Mini-Leiste beim Seitenwechsel, „Im Buch weiterlesen“, Nachschlagen,
+  Diktat (Auswertung Wort für Wort), Erfolge
+

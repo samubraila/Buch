@@ -86,7 +86,7 @@ export async function saveParsed(parsed, { format, fileKey, name } = {}) {
   }
 
   const chapters = parts.map((p, i) => {
-    const t = p.title || toc.filter((x) => x.ch <= i).at(-1)?.title || `Kapitel ${i + 1}`;
+    const t = p.title || toc.filter((x) => x.ch <= i).slice(-1)[0]?.title || `Kapitel ${i + 1}`;
     return { title: p.piece > 0 ? `${t} (${p.piece + 1})` : t, chars: plainText(p.html).length };
   });
 

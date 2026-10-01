@@ -11,7 +11,7 @@ export function dayKey(d = new Date()) {
   return `${y}-${m}-${day}`;
 }
 
-const empty = (day) => ({ day, readMs: 0, lookups: 0, saved: 0, pages: 0 });
+const empty = (day) => ({ day, readMs: 0, listenMs: 0, lookups: 0, saved: 0, pages: 0 });
 
 export function onStats(fn) {
   listeners.add(fn);
@@ -52,8 +52,9 @@ export async function streak() {
   const all = new Map((await db.getAll('stats')).map((r) => [r.day, r]));
   const d = new Date();
   let n = 0;
-  if (!((all.get(dayKey(d))?.readMs || 0) >= 60000)) d.setDate(d.getDate() - 1); // heute noch nicht gelesen
-  while ((all.get(dayKey(d))?.readMs || 0) >= 60000) {
+  const act = (r) => (r?.readMs || 0) + (r?.listenMs || 0); // Lesen + Hören
+  if (!(act(all.get(dayKey(d))) >= 60000)) d.setDate(d.getDate() - 1); // heute noch nichts
+  while (act(all.get(dayKey(d))) >= 60000) {
     n++;
     d.setDate(d.getDate() - 1);
   }
@@ -61,13 +62,14 @@ export async function streak() {
 }
 
 export async function totals() {
-  const t = { readMs: 0, lookups: 0, saved: 0, pages: 0, days: 0 };
+  const t = { readMs: 0, listenMs: 0, lookups: 0, saved: 0, pages: 0, days: 0 };
   for (const r of await db.getAll('stats')) {
     t.readMs += r.readMs || 0;
+    t.listenMs += r.listenMs || 0;
     t.lookups += r.lookups || 0;
     t.saved += r.saved || 0;
     t.pages += r.pages || 0;
-    if ((r.readMs || 0) >= 60000) t.days++;
+    if ((r.readMs || 0) + (r.listenMs || 0) >= 60000) t.days++;
   }
   return t;
 }

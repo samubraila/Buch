@@ -56,7 +56,16 @@ Einfach der Reihe nach durchgehen und abhaken:
 - [ ] **„Absatz übersetzen"** → Übersetzung erscheint direkt unter dem Absatz
 - [ ] Oben das **Zweisprachig-Symbol** (Zeilen mit „A") → jeder Absatz bekommt die Übersetzung darunter
 
-**🎧 Hören (neu)**
+**🎧 Hören (neu in 2.3: eigener Reiter „Hören")**
+- [ ] Unten **„Hören"** → bei einem englischen Buch auf **▶** → Vollbild-Player startet und liest vor
+- [ ] Der aktuelle Satz steht groß da, das gesprochene Wort ist **gelb markiert**, darunter die **russische Übersetzung**
+- [ ] Ein **Wort im Satz antippen** → Übersetzung erscheint, Wiedergabe pausiert
+- [ ] **Stimme**: „Englisch: Britisch" ausprobieren; **Tempo** ändern; **🌙 Schlaf-Timer**
+- [ ] Zur Bibliothek wechseln → unten läuft die **Mini-Leiste** weiter → antippen öffnet den Player
+- [ ] **„📖 Im Buch weiterlesen"** → das Buch öffnet sich an der gehörten Stelle
+- [ ] Bildschirm ausschalten → mit Online-Stimme läuft es weiter, Steuerung auf dem Sperrbildschirm
+
+**🎧 Vorlesen im Buch**
 - [ ] Oben **🎧** → das Buch wird vorgelesen, der Satz wird markiert, die Seite blättert mit
 - [ ] In der Leiste: **Tempo**, **🌙 Schlaf-Timer**, **+RU** (nach jedem Satz die russische Übersetzung)
 - [ ] Bildschirm ausschalten → Vorlesen läuft weiter (Einstellung „Stimme beim Anhören: Online" bzw. Automatisch)
@@ -72,6 +81,11 @@ Einfach der Reihe nach durchgehen und abhaken:
 - [ ] Deutsches Buch (z. B. „Die Verwandlung") → ein Nomen antippen (z. B. „Zimmer") → unter dem Wort steht **„das Zimmer · Plural: die Zimmer"** (Artikel farbig)
 - [ ] Ein Verb in der Vergangenheit antippen (z. B. „lief") → **„Grundform: laufen →"** → antippen öffnet „laufen"
 - [ ] Englisches Buch → „went" antippen → **„go – went – gone"**
+
+**🔎 Nachschlagen & ✍️ Diktat & 🏆 Erfolge (neu in 2.3)**
+- [ ] Vokabeln → oben **„Nachschlagen"** → z. B. „children" eintippen → Übersetzung + Grundform „child"
+- [ ] Trainieren → **„Diktat"** → Satz anhören, aufschreiben, „Prüfen" → richtige Wörter grün, fehlende rot
+- [ ] Statistik → **🏆 Erfolge** ansehen
 
 **Vokabeln & Training**
 - [ ] In der Wort-Karte oben **„☆ Zu Vokabeln"** → wird zu **„★ In Vokabeln"**, unten erscheint „Vokabeln öffnen"
@@ -102,7 +116,8 @@ Einfach der Reihe nach durchgehen und abhaken:
 | Problem | Lösung |
 |---|---|
 | **Kein Ton** | Lautstärke hoch; iPhone: Stumm-Schalter aus. Einstellungen → Aussprache → **„Online-Stimme"** probieren |
-| **Vorlesen stoppt bei ausgeschaltetem Bildschirm** | Leser → **Aa** → „Stimme beim Anhören" → **Online** |
+| **Vorlesen stoppt bei ausgeschaltetem Bildschirm** | Im Hör-Player „Stimme: **Online (natürlich)**" wählen (braucht Internet) |
+| **Kein Ton beim Hören (iPhone)** | Stumm-Schalter aus, Lautstärke hoch, im Player einmal auf **▶** tippen; sonst „Stimme: Gerät" wählen |
 | **„Nachsprechen" fehlt** | Spracherkennung gibt es nur in Chrome (Android) und Safari (iPhone) |
 | **„Übersetzung nicht erreichbar"** | Internet prüfen, kurz warten, **„Erneut versuchen"** |
 | **Buch lädt nicht bei „Entdecken"** | Im Fenster **„↻ Erneut versuchen"**. Klappt es nicht: **„📋 Fehlerbericht kopieren"** und an mich schicken |

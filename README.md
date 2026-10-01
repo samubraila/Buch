@@ -6,7 +6,7 @@ Lese- und Sprachlern-App für Laptop und Handy. Tippe auf ein Wort → sofort di
 (Zielsprache einstellbar) und die **richtige Aussprache**. Bücher kannst du dir auch **vorlesen lassen**
 oder **echte Hörbücher** hören.
 
-**Version 2.2** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
+**Version 2.3** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
 
 ## Starten
 
@@ -42,12 +42,13 @@ Die installierte Version steht unter **Einstellungen → App & Updates**.
 | **🎓 Grammatik** | Artikel in Farbe + Plural (das Haus · die Häuser), Verbformen (gehen – ging – ist gegangen, go – went – gone), Grundform antippbar |
 | **🎤 Nachsprechen** | Wort ins Mikrofon sagen – die App prüft die Aussprache in % |
 | **🌐 Zweisprachig** | „Absatz übersetzen" oder Zweisprachig-Modus: Übersetzung direkt unter jedem Absatz |
-| **🎧 Hören** | Buch vorlesen lassen (Satz wird markiert, Seite blättert mit), Tempo, Schlaf-Timer, +RU (Übersetzung nach jedem Satz), Sperrbildschirm-Steuerung |
+| **🎧 Hören** | Eigener Reiter mit Vollbild-Hörplayer: jedes Buch vorlesen lassen (Englisch US/UK, Deutsch, …), Mitlesen mit Wort-Markierung, Satz-Übersetzung, Wort antippen, Tempo, Schlaf-Timer, läuft beim Seitenwechsel weiter, Sperrbildschirm-Steuerung |
 | **🎙 Hörbücher** | Echte, von Menschen gelesene Hörbücher (LibriVox) suchen und hören – mit Kapiteln, Tempo, Schlaf-Timer |
 | **📚 Entdecken** | 28 englische Klassiker (Standard Ebooks) und deutsche Klassiker nach Schwierigkeit, Suche in 70.000+ Gutenberg-Büchern – ein Tipp lädt das Buch |
 | **🔍🔖 Suchen & Markieren** | Suche im ganzen Buch, Lesezeichen, Markierungen in 4 Farben mit Notizen |
-| **⭐ Vokabeln** | Vokabelheft mit Kontext und Grammatik, Wörter selbst hinzufügen/bearbeiten, 6 Trainingsarten (Karteikarten, Auswahl, Hören, Schreiben, Sprechen, der·die·das), Wiederholung nach 1/2/4/8/16 … Tagen, CSV-Export |
-| **📈 Statistik** | Tagesziel mit Ring, Serie 🔥, Lesezeit der letzten 14 Tage |
+| **⭐ Vokabeln** | Vokabelheft mit Kontext und Grammatik, Wörter selbst hinzufügen/bearbeiten, 7 Trainingsarten (Karteikarten, Auswahl, Hören, Schreiben, Sprechen, der·die·das, Diktat), Wiederholung nach 1/2/4/8/16 … Tagen, CSV-Export |
+| **📈 Statistik** | Tagesziel mit Ring, Serie 🔥, Lese- und Hörzeit der letzten 14 Tage, 🏆 16 Erfolge |
+| **🔎 Nachschlagen** | Wörterbuch ohne Buch: Übersetzung, Aussprache, Grammatik, speichern |
 | **💾 Übertragen** | Alles (Bücher, Fortschritt, Vokabeln, Markierungen) in eine Datei sichern und auf dem anderen Gerät laden |
 | **📤 Teilen** | Android: Text aus anderen Apps an LeseWelt teilen |
 
@@ -74,7 +75,10 @@ js/speech.js        Aussprache
 js/dict.js          Wörterbuch
 js/library.js       Bibliothek
 js/catalog.js       Entdecken (Bücher & Hörbücher)
-js/audioPlayer.js   Hörbuch-Player
+js/audioPlayer.js   Hörbuch-Player (LibriVox)
+js/listenEngine.js  Vorlese-Engine (Online-/Gerätestimme, Karaoke, Position)
+js/listen.js        Bereich „Hören“ und Vollbild-Player
+js/achievements.js  Erfolge
 js/vocab.js         Vokabelheft
 js/train.js         Training (5 Arten)
 js/grammar.js       Grammatik (Wiktionary, unregelmäßige Verben)

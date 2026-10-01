@@ -1,7 +1,21 @@
 // Neuigkeiten je Version (wird nach einem Update angezeigt)
-export const APP_VERSION = '2.2';
+export const APP_VERSION = '2.3';
 
 export const CHANGELOG = [
+  {
+    version: '2.3',
+    date: '01.10.2026',
+    items: [
+      '🎧 Neuer Bereich „Hören“: jedes Buch vorlesen lassen – Englisch, Deutsch und viele Sprachen',
+      '▶ Vollbild-Hörplayer: Satz groß zum Mitlesen, gesprochenes Wort markiert, Übersetzung darunter',
+      '👆 Wort im Satz antippen → Übersetzung, Grammatik, „Zu Vokabeln“',
+      '🗣 Stimme wählen (amerikanisch/britisch, Online/Gerät), Tempo, Schlaf-Timer, Kapitel – läuft weiter, auch wenn du die Seite wechselst',
+      '📱 iPhone: Ton wird beim ersten Tippen freigeschaltet; ohne Internet automatisch Gerätestimme',
+      '🔎 Nachschlagen ohne Buch im Vokabelheft',
+      '✍️ Neues Diktat-Training mit Sätzen aus deinen Büchern',
+      '🏆 Erfolge (Abzeichen) und Hörzeit in der Statistik',
+    ],
+  },
   {
     version: '2.2',
     date: '01.10.2026',

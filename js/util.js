@@ -253,6 +253,25 @@ export function clearErrorLog() {
   try { localStorage.removeItem('lw-errors'); } catch { /* ignorieren */ }
 }
 
+/** Kurze stille WAV-Datei – zum "Freischalten" von Ton auf dem iPhone (muss beim Antippen abgespielt werden) */
+let silentUrl = '';
+export function silentWavUrl() {
+  if (silentUrl) return silentUrl;
+  const n = 800; // 0,1 s Stille bei 8 kHz
+  const buf = new Uint8Array(44 + n);
+  const dv = new DataView(buf.buffer);
+  const str = (o, s) => [...s].forEach((ch, i) => { buf[o + i] = ch.charCodeAt(0); });
+  str(0, 'RIFF'); dv.setUint32(4, 36 + n, true); str(8, 'WAVE'); str(12, 'fmt ');
+  dv.setUint32(16, 16, true); dv.setUint16(20, 1, true); dv.setUint16(22, 1, true);
+  dv.setUint32(24, 8000, true); dv.setUint32(28, 8000, true); dv.setUint16(32, 1, true); dv.setUint16(34, 8, true);
+  str(36, 'data'); dv.setUint32(40, n, true);
+  buf.fill(128, 44);
+  let bin = '';
+  buf.forEach((b) => { bin += String.fromCharCode(b); });
+  silentUrl = 'data:audio/wav;base64,' + btoa(bin);
+  return silentUrl;
+}
+
 export function loadScript(src) {
   return new Promise((resolve, reject) => {
     if (document.querySelector(`script[src="${src}"]`)) return resolve();

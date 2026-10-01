@@ -16,7 +16,7 @@ async function route() {
   const arg = rest[0];
   try { await cleanup?.(); } catch { /* ignorieren */ }
   cleanup = null;
-  document.body.dataset.route = name || 'library';
+  document.body.dataset.route = name === 'listen' && arg ? 'player' : (name || 'library');
   const navRoute = name === 'train' ? 'vocab' : name === 'stats' ? 'library' : (name || 'library');
   document.querySelectorAll('.app-nav a').forEach((a) => a.setAttribute('aria-current', a.dataset.route === navRoute ? 'page' : 'false'));
   let fn;
@@ -24,6 +24,7 @@ async function route() {
     case 'read': { const m = await import('./reader.js'); fn = (v) => m.openReader(arg, v, { listen: rest[1] === 'listen' }); break; }
     case 'vocab': fn = (await import('./vocab.js')).openVocab; break;
     case 'train': { const m = await import('./train.js'); fn = (v) => m.openTrain(v, arg); break; }
+    case 'listen': { const m = await import('./listen.js'); fn = (v) => (arg ? m.openPlayer(v, arg) : m.openListenHub(v)); break; }
     case 'discover': { const m = await import('./catalog.js'); fn = (v) => m.openCatalog(v, arg, rest.slice(1).join('/')); break; }
     case 'stats': fn = (await import('./stats.js')).openStats; break;
     case 'settings': fn = (await import('./settingsView.js')).openSettings; break;

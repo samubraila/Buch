@@ -464,3 +464,131 @@ body[data-route='read'] .ab-bar, body[data-route='train'] .ab-bar { display: non
 .lib-filters .chip { min-height: 32px; font-size: 0.82rem; }
 .book-foot .pct.done { color: var(--ok); font-weight: 700; min-width: auto; }
 
+/* =========================================================
+   Version 2.3 – Hören, Nachschlagen, Diktat, Erfolge
+   ========================================================= */
+
+/* Navigation mit 5 Reitern auf dem Handy */
+@media (max-width: 760px) {
+  .app-nav a { font-size: 0.68rem; }
+  .nav-ico { width: 46px; }
+}
+body[data-route='player'] .app-nav { display: none; }
+body[data-route='player'] #view { margin-left: 0; padding-bottom: 0; }
+body[data-route='read'] .ls-bar, body[data-route='train'] .ls-bar { display: none; }
+body.has-ls #view { padding-bottom: 90px; }
+@media (max-width: 760px) { body.has-ls #view { padding-bottom: calc(var(--nav-h) + 84px + env(safe-area-inset-bottom)); } }
+body.has-ab .ls-bar { bottom: 90px; }
+
+/* Hören: Übersicht */
+.listen-hub h2 { margin-top: 26px; }
+.now-playing {
+  display: flex; align-items: center; gap: 14px; padding: 14px; margin-bottom: 10px; border-radius: 20px;
+  background: linear-gradient(120deg, var(--accent-soft), transparent 75%), var(--surface);
+  border: 1px solid var(--accent); color: inherit; text-decoration: none;
+}
+.now-playing .cover.small { width: 56px; }
+.np-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.np-text strong { font-family: var(--book-font); font-size: 1.1rem; }
+.listen-list { display: flex; flex-direction: column; gap: 10px; }
+.listen-row { display: flex; align-items: center; gap: 12px; padding: 10px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); }
+.listen-row .cover.small { width: 48px; }
+.lr-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.lr-text strong { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lr-text .muted { font-size: 0.84rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.listen-cover { position: relative; padding: 0; border: 0; background: none; width: 100%; cursor: pointer; }
+.play-badge {
+  position: absolute; right: 8px; bottom: 8px; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--accent); color: var(--accent-ink); box-shadow: var(--shadow-lg);
+}
+.play-badge svg { width: 22px; height: 22px; }
+.listen-grid .book-title { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.voice-quick { margin-top: 26px; }
+.mt { margin-top: 30px; }
+
+/* Vollbild-Player */
+.player-page {
+  max-width: 720px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: calc(8px + env(safe-area-inset-top)) 18px calc(20px + env(safe-area-inset-bottom));
+}
+.pl-head { display: flex; align-items: center; justify-content: space-between; }
+.pl-head-title { font-weight: 700; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-size: 0.78rem; }
+.pl-top { display: flex; gap: 16px; align-items: center; }
+.pl-top .cover.pl-cover { width: 92px; flex: none; }
+.pl-meta { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.pl-title { font-family: var(--book-font); font-size: 1.25rem; line-height: 1.25; }
+.pl-chapter { font-size: 0.86rem; font-weight: 600; color: var(--accent); }
+.pl-text {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 10px;
+  min-height: 260px;
+  padding: 18px 20px;
+  border-radius: 22px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+}
+.pl-prev, .pl-next { margin: 0; color: var(--muted); opacity: 0.55; font-family: var(--book-font); font-size: 0.95rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.pl-current { margin: 0; font-family: var(--book-font); font-size: clamp(1.3rem, 4.6vw, 1.7rem); line-height: 1.5; color: var(--ink); }
+.pl-current .w { cursor: pointer; border-radius: 5px; padding: 0 1px; transition: background-color 0.12s; }
+.pl-current .w:hover { background: var(--surface-2); }
+.pl-current .w.on { background: var(--hl-tts); box-shadow: 0 2px 0 var(--accent); }
+.pl-tr { margin: 0; padding: 8px 12px; border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; background: var(--accent-soft); font-size: 1rem; line-height: 1.5; }
+.pl-tr:empty { display: none; }
+.pl-tr.loading { min-height: 1.4em; display: block; opacity: 0.5; }
+.pl-hint { margin: 0; text-align: center; }
+.pl-progress .range { width: 100%; }
+.pl-times { display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.pl-controls { display: flex; align-items: center; justify-content: center; gap: 12px; }
+.pl-controls .icon-btn svg { width: 26px; height: 26px; }
+.pl-controls .icon-btn.big { width: 70px; height: 70px; }
+.pl-controls .icon-btn.big svg { width: 32px; height: 32px; }
+.pl-options { display: flex; flex-direction: column; gap: 8px; }
+.pl-options .select { flex: 1 1 150px; }
+.pl-check { display: inline-flex; align-items: center; gap: 6px; font-size: 0.9rem; font-weight: 600; cursor: pointer; }
+.pl-check input { width: 18px; height: 18px; accent-color: var(--accent); }
+.pl-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.pl-actions .btn { flex: 1 1 200px; justify-content: center; }
+@media (max-width: 420px) {
+  .pl-top .cover.pl-cover { width: 70px; }
+  .pl-controls { gap: 4px; }
+}
+
+/* Nachschlagen (Vokabelheft) */
+.lookup-box { padding: 16px; margin: 0 0 20px; border-radius: 18px; background: linear-gradient(120deg, var(--accent-soft), transparent 70%), var(--surface); border: 1px solid var(--line); }
+.lb-label { display: block; font-weight: 700; margin-bottom: 8px; }
+.lb-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.lb-row .input { flex: 1 1 220px; width: auto; }
+
+/* Diktat */
+.dict-form { display: flex; flex-direction: column; gap: 8px; width: 100%; max-width: 520px; }
+.dict-form .btn { align-self: center; }
+.dict-result { width: 100%; max-width: 560px; }
+.dict-score { font-size: 1.2rem; font-weight: 800; text-align: center; }
+.dict-score.good { color: var(--ok); }
+.dict-score.ok { color: #b07d10; }
+.dict-score.bad { color: var(--danger); }
+.dict-target { font-family: var(--book-font); font-size: 1.1rem; line-height: 1.6; text-align: center; }
+.dw-ok { color: var(--ok); }
+.dw-miss { color: var(--danger); text-decoration: underline wavy; text-underline-offset: 4px; }
+
+/* Erfolge */
+.badge-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.badge { display: flex; flex-direction: column; gap: 3px; padding: 12px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface-2); opacity: 0.75; }
+.badge .badge-icon { font-size: 1.7rem; filter: grayscale(1); opacity: 0.6; }
+.badge.done { opacity: 1; background: var(--surface); border-color: var(--accent); }
+.badge.done .badge-icon { filter: none; opacity: 1; }
+.badge .progress { margin-top: 4px; flex: none; }
+.badge-ok { color: var(--ok); font-weight: 700; font-size: 0.82rem; }
+
+
+/* kleines Cover im Player / Hör-Liste: Wörter nicht mitten im Wort trennen */
+.pl-cover.gen .gen-title, .listen-row .cover.gen .gen-title, .now-playing .cover.gen .gen-title { font-size: 0.62rem; overflow-wrap: normal; word-break: normal; hyphens: auto; -webkit-line-clamp: 4; }
+.pl-cover.gen .gen-author { font-size: 0.5rem; }

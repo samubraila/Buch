@@ -10,6 +10,7 @@ import { settings } from './settings.js';
 import { allWords, dueWords, onVocab } from './vocabStore.js';
 import { speak } from './speech.js';
 import { hashStr, escapeHtml } from './util.js';
+import { checkAchievements } from './achievements.js';
 
 const I = {
   plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -82,6 +83,7 @@ export async function openLibrary(mount) {
     draw();
     drawToday();
     drawLearn();
+    checkAchievements();
   }
 
   // Lernkarte (fällige Wörter) und Wort des Tages
@@ -138,9 +140,9 @@ export async function openLibrary(mount) {
   async function drawToday() {
     const [day, st] = await Promise.all([getDay(), streak()]);
     const goal = settings.dailyGoal || 15;
-    const m = minutes(day.readMs);
+    const m = minutes((day.readMs || 0) + (day.listenMs || 0));
     slot('today').innerHTML = `${goalRing(m, goal, 58)}
-      <span class="tm-text"><strong>${m}/${goal} Min.</strong><span class="muted">heute gelesen</span>
+      <span class="tm-text"><strong>${m}/${goal} Min.</strong><span class="muted">heute gelesen & gehört</span>
       <span class="streak">🔥 ${st} ${st === 1 ? 'Tag' : 'Tage'}</span></span>`;
   }
 
@@ -228,7 +230,7 @@ export async function openLibrary(mount) {
         el('strong', {}, b.title),
         el('span', { class: 'muted' }, [b.author, langName(b.lang), (b.format || '').toUpperCase(), `${b.chapters.length} Kapitel`, fmtMinutes(b.totalChars) + ' Lesezeit'].filter(Boolean).join(' · '))),
       el('a', { class: 'menu-item', href: `#/read/${b.id}`, onclick: () => dlg.close() }, '📖 Lesen'),
-      el('a', { class: 'menu-item', href: `#/read/${b.id}/listen`, onclick: () => dlg.close() }, '🎧 Anhören (vorlesen lassen)'),
+      el('a', { class: 'menu-item', href: `#/listen/${b.id}`, onclick: () => dlg.close() }, '🎧 Anhören (Hör-Player)'),
       el('a', { class: 'menu-item', href: `#/discover/audio/${encodeURIComponent(b.title)}`, onclick: () => dlg.close() }, '🎙 Echtes Hörbuch dazu suchen'),
       el('button', { class: 'menu-item', onclick: async () => {
         b.pos = { ch: 0, blk: 0, pct: 0 }; b.lastRead = 0;

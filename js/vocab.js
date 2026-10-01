@@ -3,9 +3,9 @@ import { allWords, dueWords, removeWord, saveWord, toCSV, importBackup, INTERVAL
 import { speak } from './speech.js';
 import { translateWord, translateText } from './translate.js';
 import { grammarFor, grammarLine } from './grammar.js';
-import { compactGrammar } from './popup.js';
+import { compactGrammar, openWord, openPhrase } from './popup.js';
 import { settings } from './settings.js';
-import { el, escapeHtml, langName, toast, fmtDate, LANGS } from './util.js';
+import { el, escapeHtml, langName, toast, fmtDate, LANGS, cleanWord } from './util.js';
 import { confirmDialog, openSheet, field } from './ui.js';
 
 export const SPEAK = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>';
@@ -97,6 +97,14 @@ export async function openVocab(mount) {
         <input type="file" accept=".json,application/json" hidden data-slot="file">
       </div>
     </header>
+    <form class="lookup-box" data-slot="lookup">
+      <label class="lb-label" for="lookup-input">🔎 Nachschlagen</label>
+      <div class="lb-row">
+        <input id="lookup-input" class="input" name="q" placeholder="Wort oder Satz eintippen …" autocomplete="off" autocapitalize="off" enterkeyhint="search">
+        <select class="select" name="srclang" aria-label="Sprache"></select>
+        <button class="btn primary" type="submit">Übersetzen</button>
+      </div>
+    </form>
     <div class="vocab-tools">
       <label class="search"><span class="sr-only">Suchen</span><input type="search" placeholder="Wort oder Übersetzung suchen" data-slot="q"></label>
       <div class="chips" data-slot="langs"></div>
@@ -198,6 +206,25 @@ export async function openVocab(mount) {
     } catch (err) { toast(err.message, { type: 'error' }); }
     slot('file').value = '';
   });
+  // Nachschlagen ohne Buch: Übersetzung, Aussprache, Grammatik, speichern
+  const lookupForm = slot('lookup');
+  let lastLang = 'en';
+  try { lastLang = localStorage.getItem('lw-lookup-lang') || 'en'; } catch { /* ignorieren */ }
+  const langSel = lookupForm.elements.srclang;
+  langSel.replaceChildren(...['en', 'de', ...LANGS.filter((l) => l !== 'en' && l !== 'de' && l !== settings.target)]
+    .map((l) => el('option', { value: l, selected: l === lastLang || null }, langName(l))));
+  lookupForm.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const text = lookupForm.elements.q.value.trim();
+    if (!text) { lookupForm.elements.q.focus(); return; }
+    const lang = langSel.value;
+    try { localStorage.setItem('lw-lookup-lang', lang); } catch { /* ignorieren */ }
+    const rect = lookupForm.elements.q.getBoundingClientRect();
+    lookupForm.elements.q.blur();
+    if (text.split(/\s+/).length === 1) openWord({ word: cleanWord(text) || text, lang, rect, sentence: '', bookTitle: 'Nachgeschlagen', onSaved: refresh });
+    else openPhrase({ text, lang, rect, bookTitle: 'Nachgeschlagen', onSaved: refresh });
+  });
+
   slot('q').addEventListener('input', draw);
   slot('sort').addEventListener('change', draw);
   slot('book').addEventListener('change', () => { bookFilter = slot('book').value; draw(); });

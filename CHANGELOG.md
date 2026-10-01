@@ -1,5 +1,25 @@
 # Neuigkeiten
 
+## Version 2.3 – 01.10.2026
+
+**🎧 Bücher hören – Englisch, Deutsch und viele Sprachen**
+- Neuer Reiter **„Hören“**: Weiterhören, alle eigenen Bücher mit ▶, echte Hörbücher (LibriVox)
+- **Vollbild-Hörplayer** wie in einer Hörbuch-App: großes Cover, Kapitel, Fortschritt
+- **Mitlesen:** aktueller Satz groß, das gesprochene Wort wird markiert (Karaoke), davor/danach die Nachbarsätze
+- **Übersetzung des Satzes** (Russisch) direkt darunter – ein-/ausblendbar, auf Wunsch auch vorgelesen
+- **Wort im Satz antippen** → Übersetzung, Grammatik, „Zu Vokabeln“ (Wiedergabe pausiert)
+- Stimme wählen: Englisch amerikanisch/britisch, Online-Stimme (natürlich) oder Gerätestimme (offline); Tempo; 🌙 Schlaf-Timer; Kapitelliste
+- **Läuft weiter**, wenn du die Seite wechselst (Mini-Leiste unten); Sperrbildschirm-Steuerung; Position wird pro Buch gemerkt
+- „📖 Im Buch weiterlesen“ springt an die gehörte Stelle; im Leser „⤢ Vollbild“ wechselt in den Player
+- iPhone: Ton wird beim ersten Tippen freigeschaltet; nächster Satz wird vorab geladen; ohne Online-Stimme automatisch Gerätestimme
+
+**✨ Weitere neue Funktionen**
+- 🔎 **Nachschlagen ohne Buch** im Vokabelheft (Übersetzung, Aussprache, Grammatik, speichern)
+- ✍️ **Diktat-Training:** Satz aus deinen Büchern anhören und aufschreiben – Wort für Wort ausgewertet
+- 🏆 **Erfolge:** 16 Abzeichen (Serien, Bücher, Vokabeln, Lese- und Hörzeit) mit Hinweis beim Freischalten
+- 📈 Statistik zählt jetzt auch die **Hörzeit**; Tagesziel und Serie gelten für Lesen *und* Hören
+- Kompatibilität mit älteren iPhones verbessert
+
 ## Version 2.2 – 01.10.2026
 
 **🎓 Grammatik beim Wort**

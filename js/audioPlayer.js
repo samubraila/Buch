@@ -2,7 +2,7 @@
 // – spielt in der ganzen App weiter, Mini-Leiste unten, großer Player als Sheet
 // – Sperrbildschirm-Steuerung (Media Session), Tempo, Schlaf-Timer, Position merken
 import * as db from './db.js';
-import { el, escapeHtml, toast } from './util.js';
+import { el, escapeHtml, toast, silentWavUrl } from './util.js';
 import { openSheet } from './ui.js';
 
 const audio = new Audio();
@@ -32,6 +32,12 @@ export function fmtTime(s) {
   const m = Math.floor((s % 3600) / 60);
   const sec = String(s % 60).padStart(2, '0');
   return h ? `${h}:${String(m).padStart(2, '0')}:${sec}` : `${m}:${sec}`;
+}
+
+/** Direkt beim Antippen aufrufen: schaltet Ton auf dem iPhone frei, bevor das Hörbuch geladen ist */
+export function unlock() {
+  if (book) return;
+  try { audio.src = silentWavUrl(); audio.play().catch(() => {}); } catch { /* ignorieren */ }
 }
 
 export function current() {
@@ -90,6 +96,8 @@ try { rate = Number(localStorage.getItem('lw-ab-rate')) || 1; } catch { /* ignor
 
 /** Hörbuch starten (setzt an gespeicherter Position fort) */
 export async function playBook(b, { track = null } = {}) {
+  // vorgelesenes Buch (Hör-Player) beenden, damit nicht zwei Dinge gleichzeitig laufen
+  import('./listenEngine.js').then((m) => m.stopListener()).catch(() => {});
   if (book && book.id === b.id && track == null) {
     if (audio.paused) audio.play().catch(() => {});
     openPlayer();

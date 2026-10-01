@@ -5,6 +5,7 @@ import { allWords } from './vocabStore.js';
 import * as db from './db.js';
 import { el, escapeHtml } from './util.js';
 import { segmented } from './ui.js';
+import { achievements, checkAchievements } from './achievements.js';
 
 export const minutes = (ms) => Math.round((ms || 0) / 60000);
 
@@ -30,8 +31,9 @@ export async function openStats(mount) {
   async function draw() {
     const [days, st, tot, today, words, books] = await Promise.all([lastDays(14), streak(), totals(), getDay(), allWords(), db.getAll('books')]);
     const goal = settings.dailyGoal || 15;
-    const todayMin = minutes(today.readMs);
-    const maxMin = Math.max(goal * 1.25, ...days.map((d) => minutes(d.readMs) * 1.05), 1);
+    const todayMin = minutes((today.readMs || 0) + (today.listenMs || 0));
+    const dayMin = (d) => minutes((d.readMs || 0) + (d.listenMs || 0));
+    const maxMin = Math.max(goal * 1.25, ...days.map((d) => dayMin(d) * 1.05), 1);
     const finished = books.filter((b) => (b.pos?.pct || 0) >= 0.98).length;
 
     root.innerHTML = `
@@ -41,20 +43,20 @@ export async function openStats(mount) {
         ${goalRing(todayMin, goal, 96)}
         <div class="today-info">
           <span class="eyebrow">Heute</span>
-          <strong>${todayMin} von ${goal} Minuten gelesen</strong>
+          <strong>${todayMin} von ${goal} Minuten gelesen & gehört</strong>
           <span class="muted">${todayMin >= goal ? 'Tagesziel erreicht – super! 🎉' : `Noch ${goal - todayMin} Minuten bis zum Tagesziel`}</span>
           <span class="streak">🔥 ${st} ${st === 1 ? 'Tag' : 'Tage'} am Stück</span>
         </div>
       </section>
       <section class="card-sec">
-        <div class="sec-head"><h2>Lesezeit – letzte 14 Tage</h2><span class="muted small">Minuten pro Tag · Linie = Tagesziel</span></div>
+        <div class="sec-head"><h2>Lese- & Hörzeit – letzte 14 Tage</h2><span class="muted small">Minuten pro Tag · Linie = Tagesziel</span></div>
         <div class="bar-chart" role="img" aria-label="Lesezeit der letzten 14 Tage">
           <div class="goal-line" style="bottom:${(goal / maxMin) * 100}%"><span>${goal} Min.</span></div>
           ${days.map((d) => {
-            const m = minutes(d.readMs);
+            const m = dayMin(d);
             const dt = new Date(d.day + 'T12:00:00');
             const label = `${WD[dt.getDay()]} ${dt.getDate()}.${dt.getMonth() + 1}.`;
-            return `<div class="bar-col" tabindex="0" data-tip="${escapeHtml(`${label}: ${m} Min. · ${d.lookups || 0} Wörter nachgeschlagen`)}">
+            return `<div class="bar-col" tabindex="0" data-tip="${escapeHtml(`${label}: ${m} Min. (davon ${minutes(d.listenMs)} gehört) · ${d.lookups || 0} Wörter nachgeschlagen`)}">
               <div class="bar" style="height:${m ? Math.max(2, (m / maxMin) * 100) : 0}%"></div>
               <span class="bar-x">${WD[dt.getDay()]}</span>
             </div>`;
@@ -62,19 +64,35 @@ export async function openStats(mount) {
           <div class="chart-tip" hidden></div>
         </div>
         <details class="table-view"><summary>Als Tabelle anzeigen</summary>
-          <table><thead><tr><th>Tag</th><th>Minuten</th><th>Nachgeschlagen</th><th>Gespeichert</th></tr></thead>
-          <tbody>${days.slice().reverse().map((d) => `<tr><td>${d.day}</td><td>${minutes(d.readMs)}</td><td>${d.lookups || 0}</td><td>${d.saved || 0}</td></tr>`).join('')}</tbody></table>
+          <table><thead><tr><th>Tag</th><th>Minuten</th><th>davon gehört</th><th>Nachgeschlagen</th><th>Gespeichert</th></tr></thead>
+          <tbody>${days.slice().reverse().map((d) => `<tr><td>${d.day}</td><td>${dayMin(d)}</td><td>${minutes(d.listenMs)}</td><td>${d.lookups || 0}</td><td>${d.saved || 0}</td></tr>`).join('')}</tbody></table>
         </details>
       </section>
       <section class="kpis">
         <div class="kpi"><span class="kpi-v">${Math.round(tot.readMs / 3600000 * 10) / 10}</span><span class="kpi-l">Stunden gelesen</span></div>
+        <div class="kpi"><span class="kpi-v">${Math.round(tot.listenMs / 3600000 * 10) / 10}</span><span class="kpi-l">Stunden gehört</span></div>
         <div class="kpi"><span class="kpi-v">${tot.lookups}</span><span class="kpi-l">Wörter nachgeschlagen</span></div>
         <div class="kpi"><span class="kpi-v">${words.length}</span><span class="kpi-l">Wörter im Vokabelheft</span></div>
         <div class="kpi"><span class="kpi-v">${words.filter((w) => (w.box || 0) >= 4).length}</span><span class="kpi-l">Wörter gut gelernt</span></div>
         <div class="kpi"><span class="kpi-v">${tot.days}</span><span class="kpi-l">Lesetage insgesamt</span></div>
         <div class="kpi"><span class="kpi-v">${finished}</span><span class="kpi-l">Bücher beendet</span></div>
       </section>
+      <section class="card-sec" data-slot="badges"></section>
       <section class="card-sec" data-slot="goal"><h2>Tagesziel</h2></section>`;
+
+    await checkAchievements();
+    const badges = await achievements();
+    const done = badges.filter((b) => b.done).length;
+    root.querySelector('[data-slot="badges"]').innerHTML = `
+      <div class="sec-head"><h2>🏆 Erfolge</h2><span class="muted small">${done} von ${badges.length} freigeschaltet</span></div>
+      <div class="badge-grid">${badges.map((b) => `
+        <div class="badge ${b.done ? 'done' : ''}" title="${escapeHtml(b.desc)}">
+          <span class="badge-icon">${b.icon}</span>
+          <strong>${escapeHtml(b.title)}</strong>
+          <span class="muted small">${escapeHtml(b.desc)}</span>
+          ${b.done ? '<span class="badge-ok">✓ geschafft</span>' : `<div class="progress"><span style="width:${Math.round((b.value / b.goal) * 100)}%"></span></div>
+          <span class="muted small">${b.goal >= 1 && b.goal < 2 && b.value < 1 ? Math.round(b.value * 100) + ' %' : `${Math.floor(b.value)} / ${b.goal}`}</span>`}
+        </div>`).join('')}</div>`;
 
     root.querySelector('[data-slot="goal"]').append(segmented(
       [5, 10, 15, 20, 30, 45, 60].map((v) => ({ value: v, label: `${v} Min.` })),

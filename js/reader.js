@@ -8,6 +8,7 @@ import { translateText, translateWord } from './translate.js';
 import { savedWordSet, onVocab, saveWord } from './vocabStore.js';
 import { addStat } from './statsStore.js';
 import { current as abCurrent, toggle as abToggle } from './audioPlayer.js';
+import { currentListener, stopListener } from './listenEngine.js';
 import { el, escapeHtml, debounce, clamp, wordSegments, sentenceSegments, cleanWord, isMobile, isTouch, langName, LANGS, fmtMinutes, toast, uid, storedToBlob } from './util.js';
 import { openSheet, segmented, toggle, field } from './ui.js';
 
@@ -117,6 +118,7 @@ export async function openReader(bookId, mount, opts = {}) {
       <button class="icon-btn" data-act="tts-next" aria-label="Nächster Satz">${I.next}</button>
       <button class="chip-btn" data-act="tts-rate" title="Tempo">1×</button>
       <button class="chip-btn" data-act="tts-sleep" title="Schlaf-Timer">${I.moon}<span>Aus</span></button>
+      <button class="chip-btn" data-act="tts-full" title="Im Vollbild-Hör-Player weiterhören">⤢<span>Vollbild</span></button>
       <button class="chip-btn" data-act="tts-bi" title="Nach jedem Satz die Übersetzung vorlesen">+${escapeHtml(targetLang().toUpperCase())}</button>
       <button class="icon-btn" data-act="tts-stop" aria-label="Anhören beenden">${I.close}</button>
     </div>
@@ -971,6 +973,7 @@ export async function openReader(bookId, mount, opts = {}) {
     popup.close();
     const ab = abCurrent();
     if (ab?.playing) abToggle(); // echtes Hörbuch pausieren
+    currentListener()?.pause(); // Hör-Player pausieren
     tts.on = true;
     tts.paused = false;
     tts.list = buildSentences(firstVisibleBlock());
@@ -1179,6 +1182,18 @@ export async function openReader(bookId, mount, opts = {}) {
       case 'tts-next': ttsJump(1); break;
       case 'tts-stop': ttsStop(); break;
       case 'tts-sleep': ttsSleepCycle(); break;
+      case 'tts-full': {
+        // an der aktuellen Stelle im Vollbild-Player weiterhören
+        const item = tts.list[tts.idx];
+        const node = item?.range?.startContainer;
+        const blockEl = node && (node.nodeType === 3 ? node.parentElement : node).closest(BLOCK_SEL);
+        const fromBlk = blockEl ? Math.max(0, blocks.indexOf(blockEl)) : firstVisibleBlock();
+        ttsStop();
+        if (currentListener()?.book.id === book.id) stopListener();
+        book.listen = { ch, idx: 0, fromBlk, at: Date.now() };
+        db.put('books', book).then(() => { location.hash = `#/listen/${book.id}`; });
+        break;
+      }
       case 'tts-bi':
         setSetting({ listenBilingual: !settings.listenBilingual });
         toast(settings.listenBilingual ? `Nach jedem Satz: Übersetzung (${langName(targetLang())})` : 'Nur Originaltext', { ms: 2000 });

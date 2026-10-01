@@ -3,6 +3,7 @@ import { allWords, dueWords, review } from './vocabStore.js';
 import { speak } from './speech.js';
 import { escapeHtml, langName } from './util.js';
 import { SPEAK, ctxHtml } from './vocab.js';
+import { checkAchievements } from './achievements.js';
 
 const MODES = [
   { id: 'cards', icon: '🃏', title: 'Karteikarten', desc: 'Wort sehen, Antwort aufdecken, selbst bewerten' },
@@ -11,7 +12,56 @@ const MODES = [
   { id: 'write', icon: '⌨️', title: 'Schreiben', desc: 'Übersetzung sehen und das Wort schreiben' },
   { id: 'speak', icon: '🎤', title: 'Sprechen', desc: 'Wort laut aussprechen – die App prüft es', needsMic: true },
   { id: 'article', icon: '🏷️', title: 'der · die · das', desc: 'Den richtigen Artikel deutscher Nomen wählen', needsNouns: true },
+  { id: 'dictation', icon: '✍️', title: 'Diktat', desc: 'Satz aus dem Buch anhören und aufschreiben', needsContext: true },
 ];
+
+/** Diktat-Text: kurzer Satz ganz, bei langen Sätzen nur der Satzteil um das Wort (max. ~140 Zeichen) */
+function dictationText(w) {
+  const ctx = (w.context || '').replace(/^…|…$/g, '').trim();
+  if (ctx.length <= 140) return ctx;
+  // in Satzteile an Komma/Semikolon/Doppelpunkt/Gedankenstrich teilen (ohne Lookbehind – alte iPhones)
+  const parts = [];
+  let cur = '';
+  for (const tok of ctx.split(/(\s+)/)) {
+    cur += tok;
+    if (/[,;:–—]$/.test(tok)) { parts.push(cur.trim()); cur = ''; }
+  }
+  if (cur.trim()) parts.push(cur.trim());
+  let k = parts.findIndex((p) => p.toLowerCase().includes(w.word.toLowerCase()));
+  if (k < 0) k = 0;
+  let text = parts[k];
+  let a = k;
+  let b = k;
+  while (text.length < 50 && (a > 0 || b < parts.length - 1)) {
+    if (b < parts.length - 1 && (text + ' ' + parts[b + 1]).length <= 140) { b++; text = parts.slice(a, b + 1).join(' '); } else if (a > 0 && (parts[a - 1] + ' ' + text).length <= 140) { a--; text = parts.slice(a, b + 1).join(' '); } else break;
+  }
+  return text.length > 160 ? text.slice(0, 160).replace(/\s+\S*$/, '') : text;
+}
+const hasDictation = (w) => !!w.context && dictationText(w).split(/\s+/).length >= 3;
+
+/** Wörter zweier Sätze vergleichen (längste gemeinsame Folge) → für jedes Zielwort: richtig/falsch */
+function compareWords(target, answer) {
+  const tok = (s) => s.split(/\s+/).filter(Boolean);
+  const t = tok(target);
+  const n = (w) => normAns(w);
+  const a = tok(answer).map(n);
+  const tn = t.map(n);
+  const dp = Array.from({ length: t.length + 1 }, () => new Array(a.length + 1).fill(0));
+  for (let i = t.length - 1; i >= 0; i--) {
+    for (let j = a.length - 1; j >= 0; j--) {
+      dp[i][j] = tn[i] && tn[i] === a[j] ? dp[i + 1][j + 1] + 1 : Math.max(dp[i + 1][j], dp[i][j + 1]);
+    }
+  }
+  const ok = new Array(t.length).fill(false);
+  let i = 0;
+  let j = 0;
+  while (i < t.length && j < a.length) {
+    if (tn[i] && tn[i] === a[j]) { ok[i] = true; i++; j++; } else if (dp[i + 1][j] >= dp[i][j + 1]) i++; else j++;
+  }
+  const counted = t.map((w, k) => ({ w, ok: ok[k] || !tn[k] }));
+  const real = counted.filter((x, k) => tn[k]);
+  return { words: counted, score: real.length ? Math.round((real.filter((x) => x.ok).length / real.length) * 100) : 0 };
+}
 
 const ART_GENDER = { der: 'm', die: 'f', das: 'n' };
 const isNoun = (w) => w.lang === 'de' && w.gram?.pos === 'noun' && w.gram.article && !w.word.includes(' ');
@@ -44,6 +94,7 @@ export async function openTrain(mount, mode) {
   const dueAll = await dueWords();
   const due = trainBook ? dueAll.filter((w) => w.bookTitle === trainBook) : dueAll;
   const nouns = all.filter(isNoun);
+  const dictations = all.filter(hasDictation);
   let practice = null;
   try { practice = await import('./practice.js'); } catch { practice = null; }
   const canSpeak = !!practice?.canPractice;
@@ -59,9 +110,10 @@ export async function openTrain(mount, mode) {
       ${trainBook ? `<div class="book-bar"><span>Nur Wörter aus „${escapeHtml(trainBook)}“ (${all.length})</span><button class="btn small" data-act="all-words">Alle Wörter</button></div>` : ''}
       <p class="muted">${intro}</p>
       <div class="mode-grid">${MODES.map((m) => {
-        const off = !all.length || (m.needsMic && !canSpeak) || (m.needsNouns && !nouns.length);
+        const off = !all.length || (m.needsMic && !canSpeak) || (m.needsNouns && !nouns.length) || (m.needsContext && !dictations.length);
         const why = m.needsMic && !canSpeak ? 'In diesem Browser nicht verfügbar'
           : m.needsNouns && !nouns.length ? 'Speichere zuerst deutsche Nomen (z. B. aus einem deutschen Buch)'
+            : m.needsContext && !dictations.length ? 'Speichere zuerst Wörter beim Lesen (mit Satz)'
             : m.needsNouns ? `${m.desc} · ${nouns.length} Nomen` : m.desc;
         return `<a class="mode-card ${off ? 'disabled' : ''}" href="#/train/${m.id}" ${off ? 'aria-disabled="true" tabindex="-1"' : ''}>
           <span class="mode-icon">${m.icon}</span><strong>${m.title}</strong>
@@ -79,10 +131,13 @@ export async function openTrain(mount, mode) {
   if (mode === 'article') {
     const dueNouns = due.filter(isNoun);
     queue = dueNouns.length ? dueNouns : shuffle(nouns).slice(0, 20);
+  } else if (mode === 'dictation') {
+    const dueD = due.filter(hasDictation);
+    queue = dueD.length ? dueD.slice(0, 10) : shuffle(dictations).slice(0, 10);
   } else {
     queue = due.length ? [...due] : shuffle(all).slice(0, 20);
   }
-  const extra = mode === 'article' ? !due.some(isNoun) : !due.length;
+  const extra = mode === 'article' ? !due.some(isNoun) : mode === 'dictation' ? !due.some(hasDictation) : !due.length;
   const total = queue.length;
   let done = 0;
   let reverse = false;
@@ -122,6 +177,7 @@ export async function openTrain(mount, mode) {
   function show() {
     answered = false;
     if (!queue.length) {
+      checkAchievements();
       root.innerHTML = `
         <div class="train-done">
           <div class="empty-art">🎉</div>
@@ -182,6 +238,28 @@ export async function openTrain(mount, mode) {
         <div class="choices articles">${['der', 'die', 'das'].map((a, i) =>
           `<button class="choice art-choice art-${ART_GENDER[a]}" data-act="article" data-value="${a}"><kbd>${i + 1}</kbd><span>${a}</span></button>`).join('')}</div>
         <div class="train-actions" data-slot="actions"></div>`;
+      return;
+    }
+
+    if (mode === 'dictation') {
+      root.innerHTML = header() + `
+        <div class="flashcard compact dictation">
+          <div class="fc-lang">Hör zu und schreib den Satz (${escapeHtml(langName(w.lang))})</div>
+          <div class="lk-row center">
+            <button class="listen-btn" data-act="say" aria-label="Satz anhören">${SPEAK}</button>
+          </div>
+          <div class="lk-row center"><button class="chip-btn" data-act="say-slow">🐢 Langsam</button></div>
+          <div class="muted small">Tipp: Das Wort „${escapeHtml(w.word)}“ (${escapeHtml(w.translation || '')}) kommt vor.</div>
+          <form class="dict-form" data-slot="form">
+            <textarea class="input" name="answer" rows="3" autocomplete="off" autocapitalize="sentences" spellcheck="false" lang="${w.lang}" placeholder="Was hast du gehört?"></textarea>
+            <button class="btn primary" type="submit">Prüfen</button>
+          </form>
+          <div class="dict-result" data-slot="result"></div>
+        </div>
+        <div class="train-actions" data-slot="actions"><button class="btn" data-act="dict-skip">Lösung zeigen</button></div>`;
+      const form = root.querySelector('[data-slot="form"]');
+      form.addEventListener('submit', (e) => { e.preventDefault(); checkDictation(form.elements.answer.value); });
+      speak(dictationText(w), w.lang, { rate: 0.85 }).catch(() => {});
       return;
     }
 
@@ -277,6 +355,17 @@ export async function openTrain(mount, mode) {
     nextButton(correct ? 2 : 0);
   }
 
+  function checkDictation(value) {
+    if (answered) return;
+    const w = queue[0];
+    const r = compareWords(dictationText(w), value);
+    const res = root.querySelector('[data-slot="result"]');
+    res.innerHTML = `<div class="dict-score ${r.score >= 90 ? 'good' : r.score >= 60 ? 'ok' : 'bad'}">${r.score} % richtig</div>
+      <p class="dict-target" lang="${w.lang}">${r.words.map((x) => `<span class="${x.ok ? 'dw-ok' : 'dw-miss'}">${escapeHtml(x.w)}</span>`).join(' ')}</p>`;
+    root.querySelector('[data-slot="form"] textarea').disabled = true;
+    nextButton(r.score >= 90 ? 2 : r.score >= 60 ? 1 : 0);
+  }
+
   function checkWrite(value) {
     if (answered) return;
     const w = queue[0];
@@ -335,6 +424,9 @@ export async function openTrain(mount, mode) {
     if (act === 'flip-dir') { reverse = !reverse; show(); }
     if (act === 'choose') choose(btn);
     if (act === 'article') chooseArticle(btn);
+    if (act === 'say' && w) speak(dictationText(w), w.lang, { rate: 0.85 }).catch(() => {});
+    if (act === 'say-slow' && w) speak(dictationText(w), w.lang, { slow: true }).catch(() => {});
+    if (act === 'dict-skip') checkDictation('');
     if (act === 'giveup') checkWrite('');
     if (act === 'mic') speakCheck();
     if (act === 'skip') grade(0);
@@ -343,7 +435,7 @@ export async function openTrain(mount, mode) {
   });
 
   const onKey = (e) => {
-    if (e.target.tagName === 'INPUT') return;
+    if (/INPUT|TEXTAREA/.test(e.target.tagName)) return;
     const cont = root.querySelector('[data-act="continue"]');
     if (cont && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); cont.click(); return; }
     if (mode === 'cards') {

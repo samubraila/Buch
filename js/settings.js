@@ -24,6 +24,7 @@ export const DEFAULTS = {
   bilingual: false,       // Zweisprachig lesen (Übersetzung unter jedem Absatz)
   listenBilingual: false, // Hörbuch: nach jedem Satz die Übersetzung vorlesen
   listenMode: 'auto',     // Hörbuch-Stimme: auto | device | online
+  listenShowTr: true,     // Hör-Player: Übersetzung des Satzes anzeigen
 };
 
 export const settings = { ...DEFAULTS };

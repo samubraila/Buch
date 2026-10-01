@@ -35,6 +35,7 @@
   },
   "shortcuts": [
     { "name": "Vokabeln trainieren", "url": "./#/train", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Hören", "url": "./#/listen", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Bücher entdecken", "url": "./#/discover", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] },
     { "name": "Vokabelheft", "url": "./#/vocab", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
   ]
