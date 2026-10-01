@@ -207,6 +207,8 @@ function ensureBar() {
     <button class="icon-btn" data-act="toggle" aria-label="Abspielen/Pause"></button>
     <button class="icon-btn" data-act="close" aria-label="Player schließen">${I.close}</button>
     <div class="ab-bar-progress"><span></span></div>`;
+  const img = bar.querySelector('.ab-cover');
+  img.addEventListener('error', () => { if (!img.src.endsWith('icon-192.png')) img.src = 'icons/icon-192.png'; });
   bar.addEventListener('click', (e) => {
     const act = e.target.closest('[data-act]')?.dataset.act;
     if (act === 'open') openPlayer();
@@ -269,6 +271,8 @@ export function openPlayer() {
     <h3 class="ab-list-title">Kapitel</h3>
     <ol class="ab-tracks" data-slot="tracks"></ol>`;
   sheet = openSheet({ title: 'Hörbuch', body, className: 'ab-sheet', onClose: () => { sheet = null; } });
+  const big = body.querySelector('.ab-big-cover');
+  big.addEventListener('error', () => { if (!big.src.endsWith('icon-512.png')) big.src = 'icons/icon-512.png'; });
   body.querySelector('[data-slot="tracks"]').innerHTML = book.tracks.map((t, i) =>
     `<li><button data-track="${i}"><span>${escapeHtml(t.title)}</span><small>${t.dur ? fmtTime(t.dur) : ''}</small></button></li>`).join('');
   body.addEventListener('click', (e) => {

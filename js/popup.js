@@ -7,6 +7,7 @@ import { saveWord, getWord, removeWord, vocabId } from './vocabStore.js';
 import { escapeHtml, isMobile, langName, LANGS, toast } from './util.js';
 import { canPractice, listen, feedback } from './practice.js';
 import { addStat } from './statsStore.js';
+import { grammarFor } from './grammar.js';
 
 let box;
 let token = 0;
@@ -130,6 +131,7 @@ export async function openWord(o) {
       <div class="lk-word-wrap">
         <h2 class="lk-word" lang="${src}">${escapeHtml(o.word)}</h2>
         <div class="lk-ipa" data-slot="ipa"></div>
+        <div class="lk-gram" data-slot="gram"></div>
       </div>
       <div class="lk-head-actions">
         <button class="vocab-btn ${saved ? 'on' : ''}" data-act="save" aria-pressed="${!!saved}" title="Wort ins Vokabelheft speichern">${ICON.star}<span>${saved ? 'In Vokabeln' : 'Zu Vokabeln'}</span></button>
@@ -169,6 +171,7 @@ export async function openWord(o) {
   const slot = (n) => b.querySelector(`[data-slot="${n}"]`);
   let trResult = null;
   let enData = null;
+  let gram = null;
 
   if (settings.autoSpeak) speak(o.word, src).catch(() => {});
 
@@ -186,6 +189,11 @@ export async function openWord(o) {
     if (act === 'tr-sentence') loadSentence();
     if (act === 'tr-para') { close(); o.onTranslateParagraph?.(); }
     if (act === 'practice') practice();
+    if (act === 'lemma') {
+      const lemma = e.target.closest('[data-lemma]')?.dataset.lemma;
+      if (lemma) openWord({ ...o, word: lemma });
+      return;
+    }
     if (act === 'save') {
       const btn = e.target.closest('[data-act]');
       const on = btn.classList.toggle('on');
@@ -198,6 +206,7 @@ export async function openWord(o) {
           translation: trResult?.text || '',
           alts: (trResult?.alts || []).flatMap((a) => a.terms.map((t) => t.word)).slice(0, 6),
           ipa: enData?.ipa || '',
+          gram: compactGrammar(gram),
           context: o.sentence || '', bookId: o.bookId, bookTitle: o.bookTitle,
         });
         savedToast();
@@ -299,9 +308,48 @@ export async function openWord(o) {
     }
   }
 
+  async function loadGrammar() {
+    const g = await grammarFor(o.word, src);
+    if (my !== token || !g) return;
+    gram = g;
+    const html = renderGrammar(g, o.word);
+    if (html) slot('gram').innerHTML = html;
+  }
+
   loadTr();
   loadDict();
+  loadGrammar();
   if (settings.autoSentence && o.sentence) loadSentence();
+}
+
+/** Grammatik-Zeile im Wort-Fenster */
+function renderGrammar(g, word) {
+  const e = escapeHtml;
+  const parts = [];
+  if (g.pos === 'noun' && g.article) {
+    parts.push(`<span class="art art-${g.gender}">${g.article}</span> <strong>${e(g.singular || g.word)}</strong>` +
+      (g.plural ? ` <span class="muted">· Plural:</span> die ${e(g.plural)}` : ' <span class="muted">· ohne Plural</span>'));
+  } else if (g.pos === 'verb' && g.past) {
+    parts.push(`<span class="gram-tag">Verb</span> ${e(g.lemma || g.word)} – ${e(g.past)} – ${g.aux === 'sein' ? 'ist' : 'hat'} ${e(g.participle)}` +
+      (g.present3 ? ` <span class="muted">· er ${e(g.present3)}</span>` : ''));
+  } else if (g.pos === 'adj' && g.comparative) {
+    parts.push(`<span class="gram-tag">Adjektiv</span> ${e(g.lemma || g.word)} – ${e(g.comparative)} – ${e(g.superlative)}`);
+  } else if (g.forms) {
+    parts.push(`<span class="gram-tag">unregelmäßig</span> ${g.forms.map(e).join(' – ')}`);
+  }
+  if (g.lemma && g.lemma.toLowerCase() !== word.toLowerCase()) {
+    parts.push(`<button class="lemma-link" data-act="lemma" data-lemma="${e(g.lemma)}">Grundform: <strong>${e(g.lemma)}</strong> →</button>`);
+  }
+  return parts.map((p) => `<div class="gram-line">${p}</div>`).join('');
+}
+
+/** nur das Nötigste der Grammatik im Vokabelheft speichern */
+export function compactGrammar(g) {
+  if (!g) return null;
+  const keep = ['pos', 'gender', 'article', 'plural', 'singular', 'present3', 'past', 'participle', 'aux', 'comparative', 'superlative', 'forms', 'lemma', 'word'];
+  const out = {};
+  for (const k of keep) if (g[k]) out[k] = g[k];
+  return Object.keys(out).length ? out : null;
 }
 
 export function savedToast() {

@@ -390,3 +390,77 @@ body[data-route='read'] .ab-bar, body[data-route='train'] .ab-bar { display: non
 .diag-item { padding: 8px 0; border-bottom: 1px solid var(--line); font-size: 0.85rem; }
 .diag-item small { color: var(--muted); display: block; }
 
+/* =========================================================
+   Version 2.2 – Grammatik, Lernen, Bibliothek
+   ========================================================= */
+
+/* Artikel-Farben: der = blau, die = rot, das = grün */
+:root { --art-m: #2f6bd0; --art-f: #cf3f35; --art-n: #2c8f4e; }
+[data-theme='dark'], [data-theme='black'] { --art-m: #79a6f2; --art-f: #f08a80; --art-n: #6ccf8f; }
+.art {
+  display: inline-block;
+  padding: 0 0.35em;
+  border-radius: 6px;
+  font-weight: 700;
+  font-size: 0.9em;
+  line-height: 1.5;
+  color: #fff;
+  background: var(--muted);
+}
+.art-m { background: var(--art-m); }
+.art-f { background: var(--art-f); }
+.art-n { background: var(--art-n); }
+[data-theme='dark'] .art, [data-theme='black'] .art { color: #111; }
+
+/* Grammatik im Wort-Fenster */
+.lk-gram:empty { display: none; }
+.lk-gram { margin-top: 6px; display: flex; flex-direction: column; gap: 4px; }
+.gram-line { font-size: 0.95rem; line-height: 1.45; }
+.gram-tag { font-size: 0.68rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); border: 1px solid var(--line); border-radius: 6px; padding: 1px 6px; margin-right: 4px; vertical-align: 1px; }
+.lemma-link { padding: 3px 10px; border: 1px dashed var(--accent); border-radius: 999px; background: none; color: var(--accent); font-size: 0.86rem; }
+.lemma-link:hover { background: var(--accent-soft); }
+
+/* Vokabelheft */
+.vr-word .art { font-size: 0.8rem; }
+.vr-gram { font-size: 0.86rem; color: var(--muted); margin-top: 2px; }
+.book-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 14px; margin: 0 0 14px; border-radius: 14px; background: var(--accent-soft); font-weight: 600; }
+.word-editor { display: flex; flex-direction: column; }
+.word-editor .stack { display: flex; flex-direction: column; gap: 8px; align-items: flex-start; }
+.word-editor > .btn { align-self: flex-start; margin-top: 4px; }
+.word-editor .input:disabled, .word-editor .select:disabled { opacity: 0.7; }
+
+/* Training: Artikel */
+.choices.articles { grid-template-columns: repeat(3, 1fr); }
+.art-choice { justify-content: center; font-size: 1.3rem; font-weight: 800; }
+.art-choice.art-m span { color: var(--art-m); }
+.art-choice.art-f span { color: var(--art-f); }
+.art-choice.art-n span { color: var(--art-n); }
+.art-choice.art-m, .art-choice.art-f, .art-choice.art-n { background: var(--surface); }
+.art-choice.right { background: rgb(46 139 87 / 0.12); }
+.art-choice.wrong { background: rgb(192 57 43 / 0.1); }
+.art-blank { color: var(--muted); letter-spacing: 2px; }
+.fc-front .art { font-size: 0.6em; vertical-align: 0.25em; }
+
+/* Startseite: Lernkarte & Wort des Tages */
+.learn-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin: -18px 0 34px; }
+.learn-row:empty { display: none; }
+.learn-card {
+  display: flex; align-items: center; gap: 14px; padding: 16px 18px; border-radius: 20px;
+  background: linear-gradient(120deg, var(--accent-soft), transparent 75%), var(--surface);
+  border: 1px solid var(--line); color: inherit; text-decoration: none;
+}
+.learn-card:hover { border-color: var(--accent); }
+.lc-icon { font-size: 1.8rem; }
+.lc-text { display: flex; flex-direction: column; flex: 1; min-width: 0; }
+.wod-card { display: flex; flex-direction: column; gap: 4px; padding: 16px 18px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); }
+.wod-word { display: flex; align-items: center; gap: 6px; font-family: var(--book-font); font-size: 1.35rem; }
+.wod-word .art { font-family: var(--ui-font); font-size: 0.75rem; vertical-align: 3px; }
+.wod-tr { font-weight: 600; }
+.wod-ctx { font-family: var(--book-font); font-size: 0.9rem; line-height: 1.45; }
+@media (max-width: 760px) { .learn-row { margin-top: -22px; } }
+
+/* Bibliothek: Filter & Sortierung */
+.lib-filters { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin: 0 0 18px; }
+.lib-filters .chip { min-height: 32px; font-size: 0.82rem; }
+.book-foot .pct.done { color: var(--ok); font-weight: 700; min-width: auto; }
+

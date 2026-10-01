@@ -7,6 +7,9 @@ import { openSheet, confirmDialog } from './ui.js';
 import { getDay, streak } from './statsStore.js';
 import { goalRing, minutes } from './stats.js';
 import { settings } from './settings.js';
+import { allWords, dueWords, onVocab } from './vocabStore.js';
+import { speak } from './speech.js';
+import { hashStr, escapeHtml } from './util.js';
 
 const I = {
   plus: '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
@@ -37,8 +40,10 @@ export async function openLibrary(mount) {
       </div>
     </header>
     <div class="lib-top"><div data-slot="continue"></div><a class="today-mini" href="#/stats" data-slot="today" aria-label="Statistik öffnen"></a></div>
+    <div class="learn-row" data-slot="learn"></div>
     <section>
       <div class="sec-head"><h2>Meine Bücher</h2><span class="muted" data-slot="count"></span></div>
+      <div class="lib-filters" data-slot="filters"></div>
       <div class="book-grid" data-slot="grid"></div>
       <div data-slot="empty"></div>
     </section>
@@ -64,11 +69,70 @@ export async function openLibrary(mount) {
   const fileInput = slot('file');
 
   let books = [];
+  const pref = (k, d) => { try { return localStorage.getItem(k) || d; } catch { return d; } };
+  const setPref = (k, v) => { try { localStorage.setItem(k, v); } catch { /* ignorieren */ } };
+  let sortBy = pref('lw-lib-sort', 'recent');
+  let show = pref('lw-lib-show', 'all');
+  let langShow = pref('lw-lib-lang', '');
+  const done = (b) => (b.pos?.pct || 0) >= 0.98;
+
   async function refresh() {
     urls.splice(0).forEach((u) => URL.revokeObjectURL(u));
     books = (await db.getAll('books')).sort((a, b) => (b.lastRead || b.addedAt) - (a.lastRead || a.addedAt));
     draw();
     drawToday();
+    drawLearn();
+  }
+
+  // Lernkarte (fällige Wörter) und Wort des Tages
+  async function drawLearn() {
+    const [words, due] = await Promise.all([allWords(), dueWords()]);
+    const box = slot('learn');
+    if (!box) return;
+    box.replaceChildren();
+    if (!words.length) return;
+    if (due.length) {
+      box.append(el('a', { class: 'learn-card', href: '#/train' },
+        el('span', { class: 'lc-icon' }, '🧠'),
+        el('span', { class: 'lc-text' }, el('strong', {}, `${due.length} ${due.length === 1 ? 'Wort wartet' : 'Wörter warten'} auf dich`),
+          el('span', { class: 'muted' }, 'Ein paar Minuten üben – dann bleiben sie im Kopf')),
+        el('span', { class: 'btn small primary' }, 'Üben →')));
+    }
+    const today = new Date().toISOString().slice(0, 10);
+    const sorted = [...words].sort((a, b) => a.id.localeCompare(b.id));
+    const w = sorted[hashStr(today) % sorted.length];
+    const g = w.gram;
+    const art = g?.pos === 'noun' && g.article && !w.word.includes(' ') ? `<span class="art art-${g.gender}">${g.article}</span> ` : '';
+    const wod = el('div', { class: 'wod-card' });
+    wod.innerHTML = `<span class="eyebrow">Wort des Tages</span>
+      <div class="wod-word"><span lang="${w.lang}">${art}<strong>${escapeHtml(w.word)}</strong></span>
+        <button class="icon-btn small" data-act="wod-speak" aria-label="Anhören"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/><path d="M16 8.5a4.5 4.5 0 0 1 0 7" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg></button></div>
+      <div class="wod-tr" lang="${w.target || 'ru'}">${escapeHtml(w.translation || '')}</div>
+      ${w.context ? `<div class="wod-ctx muted" lang="${w.lang}">„${escapeHtml(w.context.length > 140 ? w.context.slice(0, 138) + '…' : w.context)}“</div>` : ''}`;
+    wod.querySelector('[data-act="wod-speak"]').addEventListener('click', () => speak(w.word, w.lang).catch(() => {}));
+    box.append(wod);
+  }
+
+  function drawFilters() {
+    const langs = [...new Set(books.map((b) => b.lang).filter(Boolean))];
+    const f = slot('filters');
+    f.replaceChildren();
+    if (books.length < 2) return;
+    const chip = (label, active, fn) => el('button', { class: 'chip' + (active ? ' on' : ''), onclick: fn }, label);
+    f.append(
+      el('div', { class: 'chips' },
+        chip('Alle', show === 'all', () => { show = 'all'; setPref('lw-lib-show', show); draw(); }),
+        chip('Angefangen', show === 'reading', () => { show = 'reading'; setPref('lw-lib-show', show); draw(); }),
+        chip('Neu', show === 'new', () => { show = 'new'; setPref('lw-lib-show', show); draw(); }),
+        chip('✓ Gelesen', show === 'done', () => { show = 'done'; setPref('lw-lib-show', show); draw(); }),
+        ...(langs.length > 1 ? langs.map((l) => chip(l.toUpperCase(), langShow === l, () => { langShow = langShow === l ? '' : l; setPref('lw-lib-lang', langShow); draw(); })) : [])),
+      (() => {
+        const s = el('select', { class: 'select', 'aria-label': 'Sortieren' },
+          [['recent', 'Zuletzt gelesen'], ['added', 'Neu hinzugefügt'], ['title', 'Titel A–Z'], ['progress', 'Fortschritt']]
+            .map(([v, l]) => el('option', { value: v, selected: v === sortBy || null }, l)));
+        s.addEventListener('change', () => { sortBy = s.value; setPref('lw-lib-sort', sortBy); draw(); });
+        return s;
+      })());
   }
 
   async function drawToday() {
@@ -82,7 +146,21 @@ export async function openLibrary(mount) {
 
   function draw() {
     const q = slot('q').value.trim().toLowerCase();
-    const list = q ? books.filter((b) => (b.title + ' ' + b.author).toLowerCase().includes(q)) : books;
+    drawFilters();
+    let list = q ? books.filter((b) => (b.title + ' ' + b.author).toLowerCase().includes(q)) : books;
+    if (books.length >= 2) {
+      if (show === 'reading') list = list.filter((b) => b.lastRead && !done(b));
+      if (show === 'new') list = list.filter((b) => !b.lastRead);
+      if (show === 'done') list = list.filter(done);
+      if (langShow) list = list.filter((b) => b.lang === langShow);
+      const by = {
+        recent: (a, b) => (b.lastRead || b.addedAt) - (a.lastRead || a.addedAt),
+        added: (a, b) => b.addedAt - a.addedAt,
+        title: (a, b) => a.title.localeCompare(b.title, 'de'),
+        progress: (a, b) => (b.pos?.pct || 0) - (a.pos?.pct || 0),
+      }[sortBy];
+      if (by) list = [...list].sort(by);
+    }
     slot('count').textContent = books.length ? `${books.length} ${books.length === 1 ? 'Buch' : 'Bücher'}` : '';
 
     // Weiterlesen
@@ -139,7 +217,7 @@ export async function openLibrary(mount) {
         el('div', { class: 'book-foot' },
           el('span', { class: 'lang-chip', title: langName(b.lang) }, (b.lang || '?').toUpperCase()),
           el('div', { class: 'progress', title: `${pct} %` }, el('span', { style: `width:${pct}%` })),
-          el('span', { class: 'pct' }, pct ? pct + ' %' : 'neu'),
+          el('span', { class: 'pct' + (done(b) ? ' done' : '') }, done(b) ? '✓ Gelesen' : pct ? pct + ' %' : 'neu'),
           el('button', { class: 'icon-btn small', 'aria-label': 'Optionen', html: I.more, onclick: (e) => { e.preventDefault(); bookMenu(b); } }))));
     return a;
   }
@@ -156,6 +234,10 @@ export async function openLibrary(mount) {
         b.pos = { ch: 0, blk: 0, pct: 0 }; b.lastRead = 0;
         await db.put('books', b); dlg.close(); refresh();
       } }, '↺ Fortschritt zurücksetzen'),
+      el('button', { class: 'menu-item', onclick: async () => {
+        b.pos = { ...(b.pos || {}), pct: 1 }; b.lastRead = Date.now();
+        await db.put('books', b); dlg.close(); toast('Als gelesen markiert ✓'); refresh();
+      } }, '✓ Als gelesen markieren'),
       el('button', { class: 'menu-item danger', onclick: async () => {
         dlg.close();
         if (await confirmDialog(`„${b.title}“ wirklich löschen? Deine Vokabeln bleiben erhalten.`, { ok: 'Löschen', danger: true })) {

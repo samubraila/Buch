@@ -6,7 +6,7 @@ Lese- und Sprachlern-App für Laptop und Handy. Tippe auf ein Wort → sofort di
 (Zielsprache einstellbar) und die **richtige Aussprache**. Bücher kannst du dir auch **vorlesen lassen**
 oder **echte Hörbücher** hören.
 
-**Version 2.1** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
+**Version 2.2** – alle Neuerungen: [CHANGELOG.md](CHANGELOG.md) · Plan: [PLAN.md](PLAN.md)
 
 ## Starten
 
@@ -39,13 +39,14 @@ Die installierte Version steht unter **Einstellungen → App & Updates**.
 |---|---|
 | **Lesen** | Seiten blättern oder scrollen, 4 Themen, 5 Schriften, Inhaltsverzeichnis, Fußnoten als Popup, Fortschritt |
 | **Wort antippen** | Übersetzung + Alternativen, Aussprache normal/langsam, Lautschrift, echte Aufnahmen (US/UK), Bedeutung |
+| **🎓 Grammatik** | Artikel in Farbe + Plural (das Haus · die Häuser), Verbformen (gehen – ging – ist gegangen, go – went – gone), Grundform antippbar |
 | **🎤 Nachsprechen** | Wort ins Mikrofon sagen – die App prüft die Aussprache in % |
 | **🌐 Zweisprachig** | „Absatz übersetzen" oder Zweisprachig-Modus: Übersetzung direkt unter jedem Absatz |
 | **🎧 Hören** | Buch vorlesen lassen (Satz wird markiert, Seite blättert mit), Tempo, Schlaf-Timer, +RU (Übersetzung nach jedem Satz), Sperrbildschirm-Steuerung |
 | **🎙 Hörbücher** | Echte, von Menschen gelesene Hörbücher (LibriVox) suchen und hören – mit Kapiteln, Tempo, Schlaf-Timer |
 | **📚 Entdecken** | 28 englische Klassiker (Standard Ebooks) und deutsche Klassiker nach Schwierigkeit, Suche in 70.000+ Gutenberg-Büchern – ein Tipp lädt das Buch |
 | **🔍🔖 Suchen & Markieren** | Suche im ganzen Buch, Lesezeichen, Markierungen in 4 Farben mit Notizen |
-| **⭐ Vokabeln** | Vokabelheft mit Kontext, 5 Trainingsarten (Karteikarten, Auswahl, Hören, Schreiben, Sprechen), Wiederholung nach 1/2/4/8/16 … Tagen, CSV-Export |
+| **⭐ Vokabeln** | Vokabelheft mit Kontext und Grammatik, Wörter selbst hinzufügen/bearbeiten, 6 Trainingsarten (Karteikarten, Auswahl, Hören, Schreiben, Sprechen, der·die·das), Wiederholung nach 1/2/4/8/16 … Tagen, CSV-Export |
 | **📈 Statistik** | Tagesziel mit Ring, Serie 🔥, Lesezeit der letzten 14 Tage |
 | **💾 Übertragen** | Alles (Bücher, Fortschritt, Vokabeln, Markierungen) in eine Datei sichern und auf dem anderen Gerät laden |
 | **📤 Teilen** | Android: Text aus anderen Apps an LeseWelt teilen |
@@ -76,6 +77,7 @@ js/catalog.js       Entdecken (Bücher & Hörbücher)
 js/audioPlayer.js   Hörbuch-Player
 js/vocab.js         Vokabelheft
 js/train.js         Training (5 Arten)
+js/grammar.js       Grammatik (Wiktionary, unregelmäßige Verben)
 js/stats*.js        Statistik & Tagesziel
 js/backup.js        Sichern & Übertragen
 js/parsers/*        EPUB, FB2, PDF, TXT/HTML

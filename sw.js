@@ -34,6 +34,7 @@ const SHELL = [
   'js/practice.js',
   'js/train.js',
   'js/backup.js',
+  'js/grammar.js',
   'js/parsers/sanitize.js',
   'js/parsers/epub.js',
   'js/parsers/fb2.js',

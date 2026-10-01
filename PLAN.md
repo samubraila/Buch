@@ -179,3 +179,48 @@ jedes Buch mit Cover/Bildern scheiterte mit „Error preparing Blob/File data to
 6. ✅ Fehler verständlich anzeigen, „Erneut versuchen“, „Hilfe & Diagnose“ mit Bericht zum Kopieren
 7. ✅ Getestet mit iPhone-Engine (WebKit) und Chrome
 
+
+---
+
+# 🎓 Version 2.2 – Grammatik & besser lernen
+
+Ziel: Beim Lesen nicht nur die Übersetzung sehen, sondern auch **die Grammatik** – und die Vokabeln gezielter üben.
+
+## 18. Grammatik-Box beim Wort
+- **Deutsche Nomen:** Artikel in Farbe (**der** blau · **die** rot · **das** grün) und Plural – z. B. „**das** Haus · die Häuser“
+- **Verben:** die wichtigsten Formen – „gehen – ging – ist gegangen · er geht“, „go – went – gone“
+- **Adjektive:** „schön – schöner – am schönsten“
+- **Grundform:** Bei gebeugten Wörtern („ging“, „Häuser“, „went“) wird die Grundform gezeigt – antippen öffnet sie
+- Quelle: Wiktionary (Deutsch und Englisch), englische unregelmäßige Verben zusätzlich fest eingebaut
+
+## 19. Vokabeln mit Grammatik
+- Gespeicherte Nomen behalten ihren Artikel („das Haus“), Verben ihre Formen – im Vokabelheft und beim Training
+- **Neues Training „der · die · das“:** Artikel deutscher Nomen üben
+- **Vokabelheft:** Wort selbst hinzufügen, Übersetzung bearbeiten, nach Buch filtern, „Aus diesem Buch üben“
+
+## 20. Startseite
+- **Lernkarte:** „12 Wörter warten auf dich → Üben“
+- **Wort des Tages** aus deinem Vokabelheft (mit Aussprache)
+
+## 21. Bibliothek ordnen
+- Sortieren: zuletzt gelesen · neu hinzugefügt · Titel · Fortschritt
+- Filter: alle · angefangen · neu · fertig gelesen, nach Sprache
+- Abzeichen „✓ Gelesen“ für beendete Bücher
+
+## 22. Verbesserungen
+- Hörbuch-Cover: Ersatzbild, wenn archive.org kein Bild liefert
+- Alle Funktionen auch mit der iPhone-Engine (WebKit) getestet
+
+## Umsetzung Version 2.2 (Reihenfolge)
+1. Grammatik-Modul (Wiktionary + unregelmäßige Verben) und Anzeige im Wort-Fenster
+2. Vokabeln mit Grammatik speichern und anzeigen, Artikel-Training
+3. Vokabelheft: hinzufügen, bearbeiten, nach Buch filtern
+4. Startseite: Lernkarte und Wort des Tages
+5. Bibliothek: sortieren und filtern
+6. Tests (Chrome + iPhone-Engine), Doku, Push → GitHub baut → Online-Test
+
+**Stand Version 2.2: ✅ umgesetzt und getestet (01.10.2026)**
+- Punkte 18–22 eingebaut; getestet mit Chrome und iPhone-Engine (WebKit)
+- Geprüfte Beispiele: ging → gehen – ging – ist gegangen · Häuser → das Haus · die Häuser · Mutter → die Mutter · die Mütter ·
+  lief → laufen – lief – ist gelaufen · went → go – went – gone · children → child
+

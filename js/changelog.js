@@ -1,7 +1,19 @@
 // Neuigkeiten je Version (wird nach einem Update angezeigt)
-export const APP_VERSION = '2.1';
+export const APP_VERSION = '2.2';
 
 export const CHANGELOG = [
+  {
+    version: '2.2',
+    date: '01.10.2026',
+    items: [
+      '🎓 Grammatik beim Wort: Artikel in Farbe und Plural (das Haus · die Häuser), Verbformen (gehen – ging – ist gegangen, go – went – gone), Steigerung',
+      '🔎 Grundform: bei „ging“, „Häuser“ oder „went“ zeigt die App die Grundform – antippen öffnet sie',
+      '🏷️ Neues Training „der · die · das“ für deutsche Nomen',
+      '⭐ Vokabelheft: Wörter selbst hinzufügen, Übersetzung bearbeiten, nach Buch filtern und gezielt üben',
+      '🧠 Startseite: Lernkarte mit fälligen Wörtern und Wort des Tages',
+      '📚 Bibliothek: sortieren, filtern (angefangen, neu, gelesen), „Als gelesen markieren“',
+    ],
+  },
   {
     version: '2.1',
     date: '01.10.2026',

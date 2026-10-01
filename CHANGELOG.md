@@ -1,5 +1,27 @@
 # Neuigkeiten
 
+## Version 2.2 – 01.10.2026
+
+**🎓 Grammatik beim Wort**
+- Deutsche Nomen: Artikel in Farbe (**der** blau · **die** rot · **das** grün) und Plural – z. B. „das Haus · die Häuser“
+- Verben: „gehen – ging – ist gegangen“, „go – went – gone“; Adjektive: „schön – schöner – am schönsten“
+- Grundform: Bei „ging“, „Häuser“, „went“, „children“ zeigt die App die Grundform – antippen öffnet sie
+- Quelle: Wiktionary, englische unregelmäßige Verben fest eingebaut (funktioniert auch offline)
+
+**⭐ Vokabeln & Training**
+- Vokabeln speichern ihre Grammatik (Artikel, Plural, Verbformen) und zeigen sie im Vokabelheft und Training
+- Neues Training **„der · die · das“** für deutsche Nomen
+- Vokabelheft: **Wort selbst hinzufügen** (mit automatischer Übersetzung), **bearbeiten**, **nach Buch filtern**, „Diese Wörter üben“
+
+**🏠 Startseite & Bibliothek**
+- Lernkarte „X Wörter warten auf dich → Üben“ und **Wort des Tages**
+- Bibliothek sortieren (zuletzt gelesen, neu, Titel, Fortschritt) und filtern (angefangen, neu, gelesen, Sprache)
+- „✓ Als gelesen markieren“, Abzeichen „✓ Gelesen“
+
+**🔧 Verbesserungen**
+- Hörbuch-Cover: Ersatzbild, wenn archive.org keines liefert
+- Alle Funktionen mit der iPhone-Engine (WebKit) getestet
+
 ## Version 2.1 – 01.10.2026
 
 **📱 Bücher laden auf dem iPhone**

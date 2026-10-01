@@ -10,7 +10,15 @@ const MODES = [
   { id: 'listen', icon: '👂', title: 'Hören', desc: 'Welches Wort hörst du? – trainiert das Verstehen' },
   { id: 'write', icon: '⌨️', title: 'Schreiben', desc: 'Übersetzung sehen und das Wort schreiben' },
   { id: 'speak', icon: '🎤', title: 'Sprechen', desc: 'Wort laut aussprechen – die App prüft es', needsMic: true },
+  { id: 'article', icon: '🏷️', title: 'der · die · das', desc: 'Den richtigen Artikel deutscher Nomen wählen', needsNouns: true },
 ];
+
+const ART_GENDER = { der: 'm', die: 'f', das: 'n' };
+const isNoun = (w) => w.lang === 'de' && w.gram?.pos === 'noun' && w.gram.article && !w.word.includes(' ');
+/** Wort für die Anzeige – deutsche Nomen mit farbigem Artikel */
+const wordHtml = (w) => (isNoun(w)
+  ? `<span class="art art-${w.gram.gender}">${w.gram.article}</span> ${escapeHtml(w.word)}`
+  : escapeHtml(w.word));
 
 const shuffle = (a) => {
   const b = [...a];
@@ -28,8 +36,14 @@ export async function openTrain(mount, mode) {
   const root = document.createElement('div');
   root.className = 'page train';
   mount.replaceChildren(root);
-  const all = await allWords();
-  const due = await dueWords();
+  // Optional: nur Wörter aus einem Buch (aus dem Vokabelheft gewählt)
+  let trainBook = '';
+  try { trainBook = sessionStorage.getItem('lw-train-book') || ''; } catch { /* ignorieren */ }
+  const everything = await allWords();
+  const all = trainBook ? everything.filter((w) => w.bookTitle === trainBook) : everything;
+  const dueAll = await dueWords();
+  const due = trainBook ? dueAll.filter((w) => w.bookTitle === trainBook) : dueAll;
+  const nouns = all.filter(isNoun);
   let practice = null;
   try { practice = await import('./practice.js'); } catch { practice = null; }
   const canSpeak = !!practice?.canPractice;
@@ -37,24 +51,38 @@ export async function openTrain(mount, mode) {
   // ---------- Auswahl der Trainingsart ----------
   if (!MODES.some((m) => m.id === mode)) {
     const intro = !all.length
-      ? 'Speichere beim Lesen Wörter mit dem Stern ⭐, dann kannst du sie hier trainieren.'
+      ? 'Speichere beim Lesen Wörter mit „Zu Vokabeln“, dann kannst du sie hier trainieren.'
       : due.length ? `<strong>${due.length}</strong> Wörter sind heute fällig.` : 'Heute ist nichts fällig – du kannst trotzdem üben (20 zufällige Wörter).';
     root.innerHTML = `
       <header class="train-head"><a class="btn" href="#/vocab">← Vokabelheft</a></header>
       <h1 class="train-h1">Trainieren</h1>
+      ${trainBook ? `<div class="book-bar"><span>Nur Wörter aus „${escapeHtml(trainBook)}“ (${all.length})</span><button class="btn small" data-act="all-words">Alle Wörter</button></div>` : ''}
       <p class="muted">${intro}</p>
       <div class="mode-grid">${MODES.map((m) => {
-        const off = !all.length || (m.needsMic && !canSpeak);
+        const off = !all.length || (m.needsMic && !canSpeak) || (m.needsNouns && !nouns.length);
+        const why = m.needsMic && !canSpeak ? 'In diesem Browser nicht verfügbar'
+          : m.needsNouns && !nouns.length ? 'Speichere zuerst deutsche Nomen (z. B. aus einem deutschen Buch)'
+            : m.needsNouns ? `${m.desc} · ${nouns.length} Nomen` : m.desc;
         return `<a class="mode-card ${off ? 'disabled' : ''}" href="#/train/${m.id}" ${off ? 'aria-disabled="true" tabindex="-1"' : ''}>
           <span class="mode-icon">${m.icon}</span><strong>${m.title}</strong>
-          <span class="muted">${m.needsMic && !canSpeak ? 'In diesem Browser nicht verfügbar' : m.desc}</span></a>`;
+          <span class="muted">${why}</span></a>`;
       }).join('')}</div>`;
     root.querySelectorAll('.mode-card.disabled').forEach((a) => a.addEventListener('click', (e) => e.preventDefault()));
+    root.querySelector('[data-act="all-words"]')?.addEventListener('click', () => {
+      try { sessionStorage.removeItem('lw-train-book'); } catch { /* ignorieren */ }
+      openTrain(mount, mode);
+    });
     return () => {};
   }
 
-  const queue = due.length ? [...due] : shuffle(all).slice(0, 20);
-  const extra = !due.length;
+  let queue;
+  if (mode === 'article') {
+    const dueNouns = due.filter(isNoun);
+    queue = dueNouns.length ? dueNouns : shuffle(nouns).slice(0, 20);
+  } else {
+    queue = due.length ? [...due] : shuffle(all).slice(0, 20);
+  }
+  const extra = mode === 'article' ? !due.some(isNoun) : !due.length;
   const total = queue.length;
   let done = 0;
   let reverse = false;
@@ -111,12 +139,12 @@ export async function openTrain(mount, mode) {
       root.innerHTML = header() + `
         <div class="flashcard">
           <div class="fc-lang">${escapeHtml(langName(reverse ? tgt : w.lang))}</div>
-          <div class="fc-front" lang="${reverse ? tgt : w.lang}">${escapeHtml(front)}</div>
+          <div class="fc-front" lang="${reverse ? tgt : w.lang}">${reverse ? escapeHtml(front) : wordHtml(w)}</div>
           ${!reverse && w.ipa ? `<div class="ipa">${escapeHtml(w.ipa)}</div>` : ''}
           ${!reverse ? `<button class="chip-btn" data-act="speak">${SPEAK}<span>Anhören</span></button>` : ''}
           ${!reverse ? contextHtml(w) : ''}
           <div class="fc-back" hidden>
-            <div class="fc-answer" lang="${reverse ? w.lang : tgt}">${escapeHtml(reverse ? w.word : (w.translation || '—'))}</div>
+            <div class="fc-answer" lang="${reverse ? w.lang : tgt}">${reverse ? wordHtml(w) : escapeHtml(w.translation || '—')}</div>
             ${!reverse && w.alts?.length ? `<div class="muted">${escapeHtml(w.alts.filter((a) => a !== w.translation).slice(0, 5).join(', '))}</div>` : ''}
             ${reverse ? contextHtml(w) : ''}
           </div>
@@ -130,7 +158,7 @@ export async function openTrain(mount, mode) {
       const key = mode === 'choice' ? 'translation' : 'word';
       const opts = shuffle([w[key] || '—', ...distractors(w, key)]);
       const top = mode === 'choice'
-        ? `<div class="fc-lang">${escapeHtml(langName(w.lang))}</div><div class="fc-front" lang="${w.lang}">${escapeHtml(w.word)}</div>
+        ? `<div class="fc-lang">${escapeHtml(langName(w.lang))}</div><div class="fc-front" lang="${w.lang}">${wordHtml(w)}</div>
            <button class="chip-btn" data-act="speak">${SPEAK}<span>Anhören</span></button>${contextHtml(w)}`
         : `<div class="fc-lang">Welches Wort hörst du?</div>
            <button class="listen-btn" data-act="speak" aria-label="Nochmal anhören">${SPEAK}</button>
@@ -140,6 +168,20 @@ export async function openTrain(mount, mode) {
         <div class="choices">${opts.map((o, i) => `<button class="choice" data-act="choose" data-value="${escapeHtml(o)}" lang="${mode === 'choice' ? tgt : w.lang}"><kbd>${i + 1}</kbd><span>${escapeHtml(o)}</span></button>`).join('')}</div>
         <div class="train-actions" data-slot="actions"></div>`;
       speak(w.word, w.lang).catch(() => {});
+      return;
+    }
+
+    if (mode === 'article') {
+      const g = w.gram;
+      root.innerHTML = header() + `
+        <div class="flashcard compact">
+          <div class="fc-lang">Welcher Artikel?</div>
+          <div class="fc-front" lang="de"><span class="art-blank">___</span> ${escapeHtml(g.singular || w.word)}</div>
+          <div class="muted" lang="${tgt}">${escapeHtml(w.translation || '')}</div>
+        </div>
+        <div class="choices articles">${['der', 'die', 'das'].map((a, i) =>
+          `<button class="choice art-choice art-${ART_GENDER[a]}" data-act="article" data-value="${a}"><kbd>${i + 1}</kbd><span>${a}</span></button>`).join('')}</div>
+        <div class="train-actions" data-slot="actions"></div>`;
       return;
     }
 
@@ -166,7 +208,7 @@ export async function openTrain(mount, mode) {
     root.innerHTML = header() + `
       <div class="flashcard compact">
         <div class="fc-lang">Sprich laut aus</div>
-        <div class="fc-front" lang="${w.lang}">${escapeHtml(w.word)}</div>
+        <div class="fc-front" lang="${w.lang}">${wordHtml(w)}</div>
         ${w.ipa ? `<div class="ipa">${escapeHtml(w.ipa)}</div>` : ''}
         <div class="muted" lang="${tgt}">${escapeHtml(w.translation || '')}</div>
         <div class="lk-row center">
@@ -216,6 +258,22 @@ export async function openTrain(mount, mode) {
       root.querySelector('.flashcard').insertAdjacentHTML('beforeend',
         `<div class="fc-answer" lang="${w.lang}">${escapeHtml(w.word)}</div><div class="muted">${escapeHtml(w.translation || '')}</div>`);
     }
+    nextButton(correct ? 2 : 0);
+  }
+
+  function chooseArticle(btn) {
+    if (answered) return;
+    const w = queue[0];
+    const g = w.gram;
+    const correct = btn.dataset.value === g.article;
+    root.querySelectorAll('.choice').forEach((b) => {
+      b.disabled = true;
+      if (b.dataset.value === g.article) b.classList.add('right');
+    });
+    if (!correct) btn.classList.add('wrong');
+    root.querySelector('.art-blank').outerHTML = `<span class="art art-${g.gender}">${g.article}</span>`;
+    if (g.plural) root.querySelector('.flashcard').insertAdjacentHTML('beforeend', `<div class="muted">Plural: die ${escapeHtml(g.plural)}</div>`);
+    speak(`${g.article} ${g.singular || w.word}`, 'de').catch(() => {});
     nextButton(correct ? 2 : 0);
   }
 
@@ -276,6 +334,7 @@ export async function openTrain(mount, mode) {
     if (act === 'speak-slow' && w) speak(w.word, w.lang, { slow: true }).catch(() => {});
     if (act === 'flip-dir') { reverse = !reverse; show(); }
     if (act === 'choose') choose(btn);
+    if (act === 'article') chooseArticle(btn);
     if (act === 'giveup') checkWrite('');
     if (act === 'mic') speakCheck();
     if (act === 'skip') grade(0);
@@ -291,7 +350,7 @@ export async function openTrain(mount, mode) {
       if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); reveal(); }
       if (['1', '2', '3'].includes(e.key) && !root.querySelector('.fc-back')?.hidden) grade(Number(e.key) - 1);
     }
-    if ((mode === 'choice' || mode === 'listen') && /^[1-4]$/.test(e.key)) {
+    if ((mode === 'choice' || mode === 'listen' || mode === 'article') && /^[1-4]$/.test(e.key)) {
       root.querySelectorAll('.choice')[Number(e.key) - 1]?.click();
     }
   };

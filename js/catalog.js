@@ -246,7 +246,11 @@ export async function openCatalog(mount, tab = 'en', query = '') {
       btn.addEventListener('click', go);
       return el('article', { class: 'cat-card' },
         el('button', { class: 'cat-cover-btn', 'aria-label': `${title} anhören`, onclick: go },
-          el('div', { class: 'cover' }, el('img', { src: `${IA}/services/img/${encodeURIComponent(id)}`, alt: '', loading: 'lazy' }))),
+          el('div', { class: 'cover' }, el('img', {
+            src: `${IA}/services/img/${encodeURIComponent(id)}`, alt: '', loading: 'lazy',
+            // archive.org liefert manchmal kein Bild -> selbst gemaltes Cover
+            onerror: (e) => e.target.parentElement.replaceWith(coverEl(title, author)),
+          }))),
         el('div', { class: 'cat-meta' }, el('strong', {}, title), el('span', { class: 'muted' }, author),
           el('div', { class: 'cat-tags' }, el('span', { class: 'muted small' }, extra)), btn));
     };

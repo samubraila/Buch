@@ -68,11 +68,20 @@ Einfach der Reihe nach durchgehen und abhaken:
 - [ ] Text lange drücken → Farbe wählen → Stelle ist markiert
 - [ ] **☰** → Reiter **Lesezeichen** / **Markierungen** → Notiz hinzufügen
 
+**🎓 Grammatik (neu in 2.2)**
+- [ ] Deutsches Buch (z. B. „Die Verwandlung") → ein Nomen antippen (z. B. „Zimmer") → unter dem Wort steht **„das Zimmer · Plural: die Zimmer"** (Artikel farbig)
+- [ ] Ein Verb in der Vergangenheit antippen (z. B. „lief") → **„Grundform: laufen →"** → antippen öffnet „laufen"
+- [ ] Englisches Buch → „went" antippen → **„go – went – gone"**
+
 **Vokabeln & Training**
 - [ ] In der Wort-Karte oben **„☆ Zu Vokabeln"** → wird zu **„★ In Vokabeln"**, unten erscheint „Vokabeln öffnen"
 - [ ] Mehrere Wörter markieren (lange drücken) → in der Leiste **„⭐ Vokabeln"** → Wendung samt Übersetzung gespeichert
 - [ ] Das Wort ist im Text jetzt **gepunktet unterstrichen**
-- [ ] **Vokabeln → Trainieren** → alle 5 Arten ausprobieren: Karteikarten, Auswahl, Hören, Schreiben, Sprechen
+- [ ] **Vokabeln → Trainieren** → alle Arten ausprobieren: Karteikarten, Auswahl, Hören, Schreiben, Sprechen, **der · die · das**
+- [ ] Vokabelheft → **„＋ Wort hinzufügen"** → Wort eingeben → „Automatisch übersetzen" → Hinzufügen
+- [ ] Bei einem Wort auf ✏️ → Übersetzung ändern → Speichern
+- [ ] Startseite: **Lernkarte** („… Wörter warten auf dich") und **Wort des Tages**
+- [ ] Bibliothek: Filter **Angefangen / Neu / ✓ Gelesen** und Sortierung ausprobieren
 
 **📈 Statistik (neu)**
 - [ ] Bibliothek → Tagesziel-Ring antippen → Statistik mit Lesezeit der letzten 14 Tage
